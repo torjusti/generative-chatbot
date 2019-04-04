@@ -4,8 +4,10 @@ import os
 import re
 import nltk
 
-# Set max number of tokens in a sentence.
-MAX_NUM_TOKENS = 200
+# Set max number of tokens allowed in a sentence.
+# Sentences above this limit are completely excluded
+# from the training data.
+MAX_NUM_TOKENS = 50
 
 # Set the maximum number of utterances to load.
 MAX_NUM_UTTERANCES = 5000
@@ -71,23 +73,35 @@ def tokenize(utterance):
     return tokens
 
 
+def verify_utterance(tokens):
+    ''' Verify the quality of an utterance before including it in the dataset. '''
+    return len(tokens) <= MAX_NUM_TOKENS
+
+
 def get_utterance_pairs():
-  ''' Load utterances and split them into questions and answers. '''
-  # Load utterances from file.
-  lines = load_utterances()[:MAX_NUM_UTTERANCES]
- 
-  # Lists for input utterances with corresponding output utterances.
-  input_utterances, target_utterances = [], []
+    ''' Load utterances and split them into questions and answers. '''
+    # Load utterances from file.
+    lines = load_utterances()[:MAX_NUM_UTTERANCES]
 
-  # Loop through all lines, starting at the second line.
-  for i, line in enumerate(lines[1:], 1):
-      # Add input utterance to list.
-      input_utterances.append(tokenize(lines[i-1]))
+    # Lists for input utterances with corresponding output utterances.
+    input_utterances, target_utterances = [], []
 
-      # Add corresponding output utterance.
-      target_utterances.append(wrap_utterance(tokenize(line)))
+    # Loop through all lines, starting at the second line.
+    for i, line in enumerate(lines[1:], 1):
+        # Tokenize input and target utterances.
+        input_tokens, target_tokens = map(tokenize, (lines[i-1], lines[i]))
 
-  return input_utterances, target_utterances
+        # Check if both the input and the target utterances are good enough to use.
+        if not (verify_utterance(input_tokens) and verify_utterance(output_tokens)):
+            continue
+
+        # Add input utterance to list.
+        input_utterances.append(input_tokens)
+
+        # Add corresponding output utterance.
+        target_utterances.append(wrap_utterance(target_tokens))
+
+    return input_utterances, target_utterances
 
 
 def get_word_map(corpus):

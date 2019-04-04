@@ -12,7 +12,6 @@ sklearn = "*"
 tensorflow-gpu = "*"
 spacy = "*"
 nltk = "*"
-gensim = "*"
 
 [requires]
 python_version = "3.7"
