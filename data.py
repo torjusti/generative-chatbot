@@ -4,6 +4,11 @@ import os
 import re
 import nltk
 
+# Set max number of tokens in a sentence.
+MAX_NUM_TOKENS = 200
+
+# Set the maximum number of utterances to load.
+MAX_NUM_UTTERANCES = 5000
 
 def clean_content(content):
     ''' Cleans the text belonging to a content in the Facebook data. '''
@@ -59,7 +64,7 @@ def tokenize(utterance):
     # Tokenize the utterance using NLTK.
     tokens = [
         token for sentence in nltk.sent_tokenize(utterance, language='norwegian')
-        for token in nltk.word_tokenize(sentence, language='norwegian')
+        for token in nltk.word_tokenize(sentence, language='norwegian')[:MAX_NUM_TOKENS]
     ]
 
     # Return tokenized utterance.
@@ -69,7 +74,7 @@ def tokenize(utterance):
 def get_utterance_pairs():
   ''' Load utterances and split them into questions and answers. '''
   # Load utterances from file.
-  lines = load_utterances()
+  lines = load_utterances()[:MAX_NUM_UTTERANCES]
  
   # Lists for input utterances with corresponding output utterances.
   input_utterances, target_utterances = [], []

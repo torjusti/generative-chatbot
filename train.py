@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Input, LSTM, Dense
+from keras.layers import Input, LSTM, Dense, Embedding
 import numpy as np
 
 from data import get_utterance_pairs, get_word_map
@@ -21,9 +21,9 @@ max_decoder_seq_length = max(len(utterance) for utterance in target_utterances)
 num_encoder_tokens = len(input_token_to_num)
 num_decoder_tokens = len(target_token_to_num)
 
-encoder_input_data = np.zeros(len(input_utterances), max_encoder_seq_length, num_encoder_tokens, dtype='float32')
-decoder_input_data = np.zeros(len(target_utterances), max_decoder_seq_length, num_decoder_tokens, dtype='float32')
-decoder_target_data = np.zeros(len(target_utterances), max_decoder_seq_length, num_decoder_tokens, dtype='float32')
+encoder_input_data = np.zeros((len(input_utterances), max_encoder_seq_length, num_encoder_tokens), dtype='float32')
+decoder_input_data = np.zeros((len(target_utterances), max_decoder_seq_length, num_decoder_tokens), dtype='float32')
+decoder_target_data = np.zeros((len(target_utterances), max_decoder_seq_length, num_decoder_tokens), dtype='float32')
 
 for i, (input_utterance, target_utterance) in enumerate(zip(input_utterances, target_utterances)):
     for j, token in enumerate(input_utterance):
@@ -40,7 +40,7 @@ for i, (input_utterance, target_utterance) in enumerate(zip(input_utterances, ta
             # adding tokens from is shifted to the right by one so that
             # the special token marking the start of an utterance is
             # no longer included.
-            decoder_target_data[i, t - 1, target_token_to_num[token]] = 1
+            decoder_target_data[i, k - 1, target_token_to_num[token]] = 1
 
 LATENT_DIM = 256
 BATCN_SIZE = 64
@@ -60,10 +60,10 @@ model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 
-
-X_train, X_test, y_train, y_test = train_test_split(encoder_input_data, target_utterances, test_size=0.2, random_state=42)
-
-
+# TODO: "Note that `decoder_target_data` needs to be one-hot encoded,
+# rather than sequences of integers like `decoder_input_data`!"
 model.fit([encoder_input_data, decoder_input_data], decoder_target_data,
           batch_size=BATCN_SIZE,
-          epochs=NUM_EPOCHS)
+          epochs=NUM_EPOCHS,
+          validation_split=0.2)
+
