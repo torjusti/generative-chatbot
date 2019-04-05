@@ -12,6 +12,10 @@ MAX_NUM_TOKENS = 50
 # Set the maximum number of utterances to load.
 MAX_NUM_UTTERANCES = 5000
 
+# If specifified, only tweets from this user name will be used as replies.
+TARGET_USER = None
+
+
 def clean_content(content):
     ''' Cleans the text belonging to a content in the Facebook data. '''
     # Facebook encodes the data in their exports incorrectly. We can work around
@@ -44,13 +48,12 @@ def load_utterances():
                     # Load the data file.
                     data = json.load(f)
 
-                    if 'messages' in data:
-                        # Extend the list of utterances with the new data.
-                        utterances.extend(
-                            clean_content(message['content']) 
-                            for message in data['messages'] 
-                            if 'content' in message
-                        )
+                    for message in data.get('messages', []):
+                        if 'content' in message:
+                            utterances.append({
+                                'sender_name': clean_content(message['sender_name']),
+                                'content': clean_content(message['content']),
+                            })
 
     return utterances
 
@@ -81,18 +84,20 @@ def verify_utterance(tokens):
 def get_utterance_pairs():
     ''' Load utterances and split them into questions and answers. '''
     # Load utterances from file.
-    lines = load_utterances()[:MAX_NUM_UTTERANCES]
+    utterances = load_utterances()[:MAX_NUM_UTTERANCES]
 
     # Lists for input utterances with corresponding output utterances.
     input_utterances, target_utterances = [], []
 
-    # Loop through all lines, starting at the second line.
-    for i, line in enumerate(lines[1:], 1):
+    # Loop through all utterances, starting at the second line.
+    for i, utterance in enumerate(utterances[1:], 1):
         # Tokenize input and target utterances.
-        input_tokens, target_tokens = map(tokenize, (lines[i-1], lines[i]))
+        input_tokens, target_tokens = map(tokenize, (utterances[i-1]['content'], utterance['content']))
 
         # Check if both the input and the target utterances are good enough to use.
-        if not (verify_utterance(input_tokens) and verify_utterance(target_tokens)):
+        # Also check that the user of the target message is the target user, if set.
+        if not (verify_utterance(input_tokens) and verify_utterance(target_tokens)) or \
+                (TARGET_USER != None and utterance['sender_name'] != TARGET_USER.lower()):
             continue
 
         # Add input utterance to list.
