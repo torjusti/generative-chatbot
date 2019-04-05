@@ -92,7 +92,7 @@ def get_utterance_pairs():
         input_tokens, target_tokens = map(tokenize, (lines[i-1], lines[i]))
 
         # Check if both the input and the target utterances are good enough to use.
-        if not (verify_utterance(input_tokens) and verify_utterance(output_tokens)):
+        if not (verify_utterance(input_tokens) and verify_utterance(target_tokens)):
             continue
 
         # Add input utterance to list.
