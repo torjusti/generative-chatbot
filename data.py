@@ -114,8 +114,8 @@ def get_word_map(corpus):
     token, and vice versa. '''
     # Find tokens from all utterances in the corpus.
     tokens = set(token for utterance in corpus for token in utterance)
-    # Map tokens to an unique number.
-    token_to_num = { token: i for i, token in enumerate(tokens) }
+    # Map tokens to an unique number. Start at 1 to keep 0 as padding
+    token_to_num = { token: i for i, token in enumerate(tokens, start=1) }
     # Inverse mapping which takes numbers back to tokens.
     num_to_token = { i: token for token, i in token_to_num.items() }
     # Return both mappings.
