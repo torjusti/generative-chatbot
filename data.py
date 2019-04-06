@@ -10,10 +10,17 @@ import nltk
 MAX_NUM_TOKENS = 50
 
 # Set the maximum number of utterances to load.
-MAX_NUM_UTTERANCES = 5000
+MAX_NUM_UTTERANCES = 100000
 
 # If specifified, only tweets from this user name will be used as replies.
-TARGET_USER = None
+TARGET_USER = 'Torjus Tønnessen Iveland'
+
+# If set, we attempt to check the quality of utterances.
+VERIFY_UTTERANCES = True
+
+# If set, we filter away self-responses.
+REMOVE_SELF_REPLIES = True
+
 
 
 def clean_content(content):
@@ -95,9 +102,15 @@ def get_utterance_pairs():
         input_tokens, target_tokens = map(tokenize, (utterances[i-1]['content'], utterance['content']))
 
         # Check if both the input and the target utterances are good enough to use.
-        # Also check that the user of the target message is the target user, if set.
-        if not (verify_utterance(input_tokens) and verify_utterance(target_tokens)) or \
-                (TARGET_USER != None and utterance['sender_name'] != TARGET_USER.lower()):
+        if VERIFY_UTTERANCES and not (verify_utterance(input_tokens) and verify_utterance(target_tokens)):
+            continue
+
+        # Check that the user of the target message is the target user, if set.
+        if TARGET_USER != None and utterance['sender_name'] != TARGET_USER.lower():
+            continue
+
+        # If set, we remove self replies from the dataset.
+        if REMOVE_SELF_REPLIES and utterances[i-1]['sender_name'] == utterance['sender_name']:
             continue
 
         # Add input utterance to list.
