@@ -114,9 +114,29 @@ def get_word_map(corpus):
     token, and vice versa. '''
     # Find tokens from all utterances in the corpus.
     tokens = set(token for utterance in corpus for token in utterance)
-    # Map tokens to an unique number. Start at 1 to keep 0 as padding
-    token_to_num = { token: i for i, token in enumerate(tokens, start=1) }
+    # Map tokens to an unique number.
+    token_to_num = { token: i for i, token in enumerate(tokens) }
     # Inverse mapping which takes numbers back to tokens.
     num_to_token = { i: token for token, i in token_to_num.items() }
     # Return both mappings.
     return token_to_num, num_to_token
+
+
+class TokenMapper():
+    def __init__(self, utterances):
+        ''' Create a word map for the utterances and add special tokens. '''
+        tok2num, num2tok = get_word_map(utterances)
+
+        self.tok2num = tok2num
+        self.num2tok = num2tok
+
+        # Add special tokens to the set of available tokens.
+        for token in ['<u>', '</u>']:
+            self.add_token(token)
+    
+
+    def add_token(self, token):
+        ''' Adds a new token to the end of the mapper dictionary. '''
+        if token not in self.tok2num:
+            self.tok2num[token] = len(self.num2tok)
+            self.num2tok[len(self.num2tok)] = token
