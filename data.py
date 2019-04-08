@@ -7,20 +7,19 @@ import nltk
 # Set max number of tokens allowed in a sentence.
 # Sentences above this limit are completely excluded
 # from the training data.
-MAX_NUM_TOKENS = 50
+MAX_NUM_TOKENS = os.getenv('MAX_NUM_TOKENS', 50)
 
 # Set the maximum number of utterances to load.
-MAX_NUM_UTTERANCES = 100000
+MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 100000)
 
 # If specifified, only tweets from this user name will be used as replies.
-TARGET_USER = 'Torjus Tønnessen Iveland'
+TARGET_USER = os.getenv('TARGET_USER', None)
 
 # If set, we attempt to check the quality of utterances.
-VERIFY_UTTERANCES = True
+VERIFY_UTTERANCES = os.getenv('VERIFY_UTTERANCES', True)
 
 # If set, we filter away self-responses.
-REMOVE_SELF_REPLIES = True
-
+REMOVE_SELF_REPLIES = os.getenv('REMOVE_SELF_REPLIES', True)
 
 
 def clean_content(content):
