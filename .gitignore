@@ -9,6 +9,8 @@ corpus
 *.pdf
 *.gz
 
+# Model files
+*.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
