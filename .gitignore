@@ -1,3 +1,7 @@
+# TensorFlow files
+TensorBoard
+corpus
+
 # Latex files
 *.aux
 *.fdb_latexmk
@@ -5,6 +9,8 @@
 *.pdf
 *.gz
 
+# Model files
+*.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
