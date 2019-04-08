@@ -21,6 +21,12 @@ VERIFY_UTTERANCES = os.getenv('VERIFY_UTTERANCES', True)
 # If set, we filter away self-responses.
 REMOVE_SELF_REPLIES = os.getenv('REMOVE_SELF_REPLIES', True)
 
+# Special tokens.
+START_UTTERANCE = '<u>'
+END_UTTERANCE = '</u>'
+UNKNOWN_TOKEN = '<unk>'
+PAD_TOKEN = '<pad>'
+
 
 def clean_content(content):
     ''' Cleans the text belonging to a content in the Facebook data. '''
@@ -119,6 +125,11 @@ def get_utterance_pairs():
         target_utterances.append(wrap_utterance(target_tokens))
 
     return input_utterances, target_utterances
+
+
+def pad_tokens(tokens, max_length):
+    ''' Add padding tokens to the given list of tokens until the max length is reached. '''
+    return tokens + [PAD_TOKEN] * (max_length - len(tokens))
 
 
 def get_word_map(corpus):

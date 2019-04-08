@@ -2,7 +2,7 @@ from keras.models import Model
 from keras.layers import Input, LSTM, Dense, Embedding
 import numpy as np
 
-from data import get_utterance_pairs, get_word_map
+from data import get_utterance_pairs, TokenMapper, pad_tokens
 
 
 # Pair utterances as inputs and outputs.
@@ -16,6 +16,10 @@ target_token_to_num, num_to_target_token = get_word_map(target_utterances)
 # The longest utterances which occur in the data.
 max_encoder_seq_length = max(len(utterance) for utterance in input_utterances)
 max_decoder_seq_length = max(len(utterance) for utterance in target_utterances)
+
+# Pad tokens to the maximum length.
+input_utterances = [pad_tokens(tokens, max_encoder_seq_length) for tokens in input_utterances]
+target_utterances = [pad_tokens(tokens, max_decoder_seq_length) for tokens in target_utterances]
 
 # The number of different tokens in the data.
 num_encoder_tokens = len(input_token_to_num)
