@@ -101,17 +101,8 @@ class Chatbot():
     def reply(self, input_query):
         tokens = pad_tokens(tokenize(input_query), self.max_encoder_seq_length)
 
-        input_sequence = []
-        ids = []
-
-        # Add the tok2num value for each token if it is a part of vocabulary
-        # pad with id 0 is it does not exist
-        ids = [self.target_mapper.tok2num[token] 
-                if token in self.target_mapper.tok2num else self.target_mapper.tok2num[PAD_TOKEN]
-                for token in tokens]
-
-        # Convert from text to a sequence
-        input_sequence.append(ids)
+        # Map each token to a number.
+        input_sequence = [[self.target_mapper.tok2num[token] for token in tokens]]
 
         # Get decoder inputs/encoder outputs
         states = self.encoder_model.predict(input_sequence)
@@ -119,26 +110,24 @@ class Chatbot():
         # Setup decoder inputs
         target_sequence = np.zeros((1, self.num_decoder_tokens))
         target_sequence[0, self.target_mapper.tok2num[START_UTTERANCE]] = 1
-        target_text = ''
-        target_text_len = 0
-        terminated = False
 
-        while not terminated:
+        output = []
+
+        while True:
             # Predict output
             output_tokens, state_h, state_c = self.decoder_model.predict([target_sequence] + states)
             token_idx = np.argmax(output_tokens[0, -1, :])
             word = self.target_mapper.num2tok[token_idx]
-            target_text_len += 1
+
+            if word == END_UTTERANCE or len(output) >= self.max_decoder_seq_length:
+                break
 
             if word != START_UTTERANCE and word != END_UTTERANCE:
-                target_text += ' ' + word
-
-            if word == END_UTTERANCE or target_text_len >= self.max_decoder_seq_length:
-                terminated = True
+                output.append(word)
 
             target_sequence = np.zeros((1, self.num_decoder_tokens))
             target_sequence[0, token_idx] = 1
 
             states = [state_h, state_c]
 
-        return target_text.strip().replace(UNKNOWN_TOKEN, '')
+        return ' '.join(output).replace(UNKNOWN_TOKEN, '')
