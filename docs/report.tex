@@ -1,6 +1,9 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{parskip}
+\usepackage{biblatex}
+
+\addbibresource{references.bib}
 
 \title{TDT4310 --- Project Assignment}
 \author{Torjus Iveland \& Vegar Andreas Bergum}
@@ -31,12 +34,12 @@ the task is further complicated by the lack of training data available in Norweg
 We especially want to verify that deep learning techniques such as sequence-to-sequence
 models can be used to create general-purpose Norwegian chatbots, which for example could be used
 as a smalltalk moule in another more domain-specific chatbot. We do this by implementing a simple
-Norwegian chatbot using a sequence-to-sequence model.
+Norwegian chatbot using a sequence-to-sequence \cite{Cho2014} model.
 
 + Something about how we want to structure the rest of the report.
 + Fix that goal, motivation, question and hypothesis are not clear. Second paragraph is crap.
 + How we structure the rest of the report.
-+ Attention, BERT and similar when we hopefully begin using it.
++ Attention \cite{Bahdanau2015}, BERT and similar when we hopefully begin using it.
 
 \section{Method}
 
@@ -83,5 +86,7 @@ In this report, we describe a generative chatbot which is based on an unsupervis
 
 % Om avslutningen din skal være en konklusjon eller en oppsummering, avhenger av problemstillingen din. En konklusjon skal svare på problemstillingen, mens en oppsummering gjentar det viktigste fra oppgaven. Det er ikke uvanlig å velge en kombinasjon av de to, hvor du både oppsummerer oppgaven kort, men også svarer på problemstillingen.
 % Det er lurt å la avslutningen speile innledningen, ved å si hva du har gjort. Avslutningen bør også sette oppgaven din i et større perspektiv, og peke på hvilke muligheter du ser ut fra ditt prosjekt. Hvilke bidrag har din undersøke gitt til faget? Er det noe som burde blitt studert ytterligere? Slik tar du utgangspunkt i ditt eget prosjekt og peker på mulighet for oppfølging.
+
+\printbibliography
 
 \end{document}
