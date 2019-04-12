@@ -120,11 +120,11 @@ class Chatbot():
 
     def __train(self):
         if not os.path.isfile(MODEL_PATH):
-            # Save token mapper
-            np.save('models/target_mapper_tok2num.npy', defaultdict(self.target_mapper.get_tok2num))
-            np.save('models/target_mapper_num2tok.npy', defaultdict(self.target_mapper.get_num2tok))
-            np.save('models/input_mapper_tok2num.npy', defaultdict(self.input_mapper.get_tok2num))
-            np.save('models/input_mapper_num2tok.npy', defaultdict(self.input_mapper.get_num2tok))
+            # Save token mappers.
+            np.save('models/target_mapper_tok2num.npy', self.target_mapper.tok2num)
+            np.save('models/target_mapper_num2tok.npy', self.target_mapper.num2tok)
+            np.save('models/input_mapper_tok2num.npy', self.input_mapper.tok2num)
+            np.save('models/input_mapper_num2tok.npy', self.input_mapper.num2tok)
 
             # TODO: "Note that `decoder_target_data` needs to be one-hot encoded,
             # rather than sequences of integers like `decoder_input_data`!"
@@ -137,7 +137,7 @@ class Chatbot():
             # Load token mapper
             self.target_mapper.tok2num = np.load('models/target_mapper_tok2num.npy').item()
             self.target_mapper.num2tok = np.load('models/target_mapper_num2tok.npy').item()
-            self.input_mapper.tok2num = np.load('models/snput_mapper_tok2num.npy').item()
+            self.input_mapper.tok2num = np.load('models/input_mapper_tok2num.npy').item()
             self.input_mapper.num2tok = np.load('models/input_mapper_num2tok.npy').item()
 
             self.model.load_weights(MODEL_PATH)
@@ -164,7 +164,8 @@ class Chatbot():
             # Predict output
             output_tokens, state_h, state_c = self.decoder_model.predict([target_sequence] + states)
             token_idx = np.argmax(output_tokens[0, -1, :])
-            print(token_idx)
+            print(token_idx, self.target_mapper.num2tok[token_idx])
+
             print(output_tokens[0, -1, 1092])
             word = self.target_mapper.num2tok[token_idx]
 

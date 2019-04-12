@@ -133,6 +133,12 @@ def pad_tokens(tokens, max_length):
     return tokens + [PAD_TOKEN] * (max_length - len(tokens))
 
 
+def get_unknown_token():
+    ''' Function which returns the unknown token code. We cannot use a lambda, as
+    these cannot be pickled by Python automatically. '''
+    return 0
+
+
 def get_word_map(corpus):
     ''' Create mapping between tokens and an unique number for each
     token, and vice versa. '''
@@ -142,7 +148,7 @@ def get_word_map(corpus):
     # Map tokens to an unique number. Assign all unknown
     # tokens to the same value. We use the number 0 for
     # this special token, to allow the use of defaultdict.
-    token_to_num = collections.defaultdict(lambda: 0)
+    token_to_num = collections.defaultdict(get_unknown_token)
 
     # Add the unknown token for good measure.
     token_to_num[UNKNOWN_TOKEN] = 0
@@ -172,12 +178,7 @@ class TokenMapper():
         # Add special tokens to the set of available tokens.
         for token in [START_UTTERANCE, END_UTTERANCE, UNKNOWN_TOKEN]:
             self.add_token(token)
-    
-    def get_tok2num(self):
-        return self.tok2num
 
-    def get_num2toks(self):
-        return self.num2tok
 
     def add_token(self, token):
         ''' Adds a new token to the end of the mapper dictionary. '''
