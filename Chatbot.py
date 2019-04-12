@@ -1,7 +1,8 @@
 from keras.models import Model
-from keras.layers import Input, LSTM, Dense, Embedding
+from keras.layers import Dense, LSTM, CuDNNLSTM, Input, Embedding, TimeDistributed, Flatten, Dropout
 import numpy as np
 import os
+from collections import defaultdict
 
 from data import get_utterance_pairs, TokenMapper, pad_tokens, tokenize, START_UTTERANCE, END_UTTERANCE, UNKNOWN_TOKEN, PAD_TOKEN
 
@@ -9,6 +10,7 @@ from data import get_utterance_pairs, TokenMapper, pad_tokens, tokenize, START_U
 LATENT_DIM = 256
 BATCN_SIZE = 64
 NUM_EPOCHS = 10
+DROPOUT_RATE = 0.2
 MODEL_PATH = 'models/model.h5'
 
 
@@ -57,34 +59,73 @@ class Chatbot():
                     self.decoder_target_data[i, k-1, self.target_mapper.tok2num[token]] = 1
 
     def __build_model(self):
-        encoder_inputs = Input(shape=(None,))
-        encoder_embedding = Embedding(input_dim=self.num_encoder_tokens, output_dim=LATENT_DIM)(encoder_inputs)
-        encoder_LSTM = LSTM(LATENT_DIM, return_sequences=True, return_state=True)
-        encoder_outputs, state_h, state_c = encoder_LSTM(encoder_embedding)
+
+        # Encoder input layer
+        encoder_input = Input(shape=(None,))
+
+        # Encoder hidden layers
+        encoder_embedding = Embedding(input_dim=self.num_encoder_tokens, output_dim=LATENT_DIM)(encoder_input)
+        encoder_dropout = (TimeDistributed(Dropout(rate = DROPOUT_RATE)))(encoder_embedding)
+        encoder_LSTM = LSTM(LATENT_DIM, return_sequences=True)(encoder_dropout)
+
+        # Encoder output layers
+        encoder_LSTM2 = LSTM(LATENT_DIM, return_state=True)
+        encoder_outputs, state_h, state_c = encoder_LSTM2(encoder_LSTM)
+
+        # Only need the states
         encoder_states = [state_h, state_c]
 
-        decoder_inputs = Input(shape=(None,))
-        decoder_embedding = Embedding(input_dim=self.num_decoder_tokens, output_dim=LATENT_DIM)(decoder_inputs)
-        decoder_LSTM = LSTM(LATENT_DIM, return_sequences=True, return_state=True)
-        decoder_outputs,_,_ = decoder_LSTM(decoder_embedding, initial_state=encoder_states)
-        decoder_dense = Dense(self.num_decoder_tokens, activation='softmax')
-        decoder_outputs = decoder_dense(decoder_outputs)
+        # Decoder input layer
+        decoder_input = Input(shape=(None,))
 
-        self.model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+        # Decoder hidden layers
+        decoder_embedding_layer = Embedding(input_dim=self.num_decoder_tokens, output_dim=LATENT_DIM)
+        decoder_embedding = decoder_embedding_layer(decoder_input)
+
+        decoder_dropout_layer = (TimeDistributed(Dropout(rate=DROPOUT_RATE)))
+        decoder_dropout = decoder_dropout_layer(decoder_embedding)
+
+
+        decoder_LSTM_layer = LSTM(LATENT_DIM, return_sequences=True)
+        decoder_LSTM = decoder_LSTM_layer(decoder_dropout, initial_state=encoder_states)
+
+        decoder_LSTM2_layer = LSTM(LATENT_DIM, return_sequences=True, return_state=True)
+        decoder_LSTM2, state_h, state_c = decoder_LSTM2_layer(decoder_LSTM)
+        decoder_states = [state_h, state_c]
+
+        decoder_dense = Dense(self.num_decoder_tokens, activation='softmax')
+        decoder_outputs = decoder_dense(decoder_LSTM2)
+
+        self.model = Model([encoder_input, decoder_input], decoder_outputs)
         self.model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 
-        # Used for encoding incoming sentences when predicting output
-        self.encoder_model = Model(encoder_inputs, encoder_states)
+        # define the encoder model 
+        self.encoder_model = Model(encoder_input, encoder_states)
 
-        decoder_state_inputs = [Input(shape=(LATENT_DIM,)), Input(shape=(LATENT_DIM,))]
-        decoder_outputs, state_h, state_c = decoder_LSTM(decoder_embedding, initial_state=decoder_state_inputs)
+        # Redefine the decoder model with decoder will be getting below inputs from encoder while in prediction
+        decoder_state_input_h = Input(shape=(LATENT_DIM,))
+        decoder_state_input_c = Input(shape=(LATENT_DIM,))
+        decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
+
+        decoder_LSTM = decoder_LSTM_layer(decoder_embedding, initial_state=decoder_states_inputs)
+        decoder_LSTM2, state_h, state_c = decoder_LSTM2_layer(decoder_LSTM)
         decoder_states = [state_h, state_c]
-        decoder_outputs = decoder_dense(decoder_outputs)
-        # Used for decoding incoming sentences when predicting output
-        self.decoder_model = Model([decoder_inputs] + decoder_state_inputs, [decoder_outputs] + decoder_states)
+        
+        decoder_outputs = decoder_dense(decoder_LSTM2)
+
+        # sampling model will take encoder states and decoder_input(seed initially) and output the predictions(french word index) We dont care about decoder_states2
+        self.decoder_model = Model([decoder_input] + decoder_states_inputs, [decoder_outputs] + decoder_states)
+
+
 
     def __train(self):
         if not os.path.isfile(MODEL_PATH):
+            # Save token mapper
+            np.save('models/target_mapper_tok2num.npy', defaultdict(self.target_mapper.get_tok2num))
+            np.save('models/target_mapper_num2tok.npy', defaultdict(self.target_mapper.get_num2tok))
+            np.save('models/input_mapper_tok2num.npy', defaultdict(self.input_mapper.get_tok2num))
+            np.save('models/input_mapper_num2tok.npy', defaultdict(self.input_mapper.get_num2tok))
+
             # TODO: "Note that `decoder_target_data` needs to be one-hot encoded,
             # rather than sequences of integers like `decoder_input_data`!"
             self.model.fit([self.encoder_input_data, self.decoder_input_data], self.decoder_target_data,
@@ -93,6 +134,12 @@ class Chatbot():
                       validation_split=0.2)
             self.model.save_weights(MODEL_PATH)
         else: 
+            # Load token mapper
+            self.target_mapper.tok2num = np.load('models/target_mapper_tok2num.npy').item()
+            self.target_mapper.num2tok = np.load('models/target_mapper_num2tok.npy').item()
+            self.input_mapper.tok2num = np.load('models/snput_mapper_tok2num.npy').item()
+            self.input_mapper.num2tok = np.load('models/input_mapper_num2tok.npy').item()
+
             self.model.load_weights(MODEL_PATH)
 
     def print_model(self):
@@ -102,14 +149,14 @@ class Chatbot():
         tokens = pad_tokens(tokenize(input_query), self.max_encoder_seq_length)
 
         # Map each token to a number.
-        input_sequence = [[self.target_mapper.tok2num[token] for token in tokens]]
+        input_sequence = [self.target_mapper.tok2num[token] for token in tokens]
 
         # Get decoder inputs/encoder outputs
         states = self.encoder_model.predict(input_sequence)
 
         # Setup decoder inputs
-        target_sequence = np.zeros((1, self.num_decoder_tokens))
-        target_sequence[0, self.target_mapper.tok2num[START_UTTERANCE]] = 1
+        target_sequence = np.zeros((1, 1))
+        target_sequence[0, 0] = self.target_mapper.tok2num[START_UTTERANCE]
 
         output = []
 
@@ -117,7 +164,10 @@ class Chatbot():
             # Predict output
             output_tokens, state_h, state_c = self.decoder_model.predict([target_sequence] + states)
             token_idx = np.argmax(output_tokens[0, -1, :])
+            print(token_idx)
+            print(output_tokens[0, -1, 1092])
             word = self.target_mapper.num2tok[token_idx]
+
 
             if word == END_UTTERANCE or len(output) >= self.max_decoder_seq_length:
                 break
@@ -125,8 +175,8 @@ class Chatbot():
             if word != START_UTTERANCE and word != END_UTTERANCE:
                 output.append(word)
 
-            target_sequence = np.zeros((1, self.num_decoder_tokens))
-            target_sequence[0, token_idx] = 1
+            target_sequence = np.zeros((1, 1))
+            target_sequence[0, 0] = token_idx
 
             states = [state_h, state_c]
 

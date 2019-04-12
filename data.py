@@ -173,6 +173,11 @@ class TokenMapper():
         for token in [START_UTTERANCE, END_UTTERANCE, UNKNOWN_TOKEN]:
             self.add_token(token)
     
+    def get_tok2num(self):
+        return self.tok2num
+
+    def get_num2toks(self):
+        return self.num2tok
 
     def add_token(self, token):
         ''' Adds a new token to the end of the mapper dictionary. '''
