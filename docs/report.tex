@@ -1,5 +1,9 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{parskip}
+\usepackage{biblatex}
+
+\addbibresource{references.bib}
 
 \title{TDT4310 --- Project Assignment}
 \author{Torjus Iveland \& Vegar Andreas Bergum}
@@ -11,85 +15,78 @@
 
 \section{Abstract}
 
-hypothesis: seq2seq is good for norwegian?
-
-
-????????????????????//
-- text classifier for å finne ut om vi har noen forhåndsdefinerte intents eller ikke
-- trenger da treningssetninger. kan kanskje også bruke BERT??? idk, fint buzzword da
-- kan da blæste entity recognition for å håndtere svar på spesifikke spørsmål
-- fallback intent = smalltalk system med noe neural net greier. bruk data 
-- word2vec
-- intent classification med keras eller scikit-learn tradisjonelle algos (http://docs.deeppavlov.ai/en/latest/components/classifiers.html)
-???????????????????????
-
-
-
-
-
-
-
-
-
-
-Lengre oppgaver, som bachelor- og masteroppgaver, skal ha et sammendrag. Det er viktig at sammendraget er informativt, siden det skal kunne leses av lesere som ikke er eksperter på området.
-
-Sammendraget skal være kort, helst ikke over én A4-side, og skal gi et overblikk over hovedinnholdet. Du skal fortelle leseren:
-
-hva du har undersøkt
-hvordan du gjorde det
-hva du fant ut
++ What we researched.
++ How we did it.
++ What we found out.
 
 \section{Introduction}
 
-Problem vi skal studere:
+A chatbot is a computer system which can interact with an user through natural language. Because
+humans tend to prefer more human-like interfaces, chatbots can be very useful in applications
+such as customer support, education, and personal productivity systems like Google Assistant.
+However, most research on such systems concern chatbots which converse in English.
 
-In this project, we look into applying conventional techniques for chatbot creation to create and evaluate a chatbot using the Norwegian language instead of English.
+In this project, we explore chatbots which utilise the Norwegian language, with the goal of
+verifying that conventional chatbot-creation techniques also can function adequately in
+Norwegian. The Norwegian languge has a syntactic structure which differs from English, and
+the task is further complicated by the lack of training data available in Norwegian.
 
+We especially want to verify that deep learning techniques such as sequence-to-sequence
+models can be used to create general-purpose Norwegian chatbots, which for example could be used
+as a smalltalk moule in another more domain-specific chatbot. We do this by implementing a simple
+Norwegian chatbot using a sequence-to-sequence \cite{Cho2014} model.
 
-Bakgrunn for valg av tema: TODO
-
-Problemstilling / hypotese: TODO. Eks: We especially want to consider using deep learning techniques...
-
-Kan også si hvordan vi skal strukturere resten av oppgaven.
-
-\section{Theory}
-
-I teorikapitlet skal du plassere din studie inn i et overordnet teoretisk rammeverk. Formålet med dette kapitlet er å gjøre rede for de spesifikke teoriene og begrepene du anvender senere i avhandlingen. Du bør også begrunne hvorfor de er viktige for din studie. Du skal vise at du har forstått teorien du skal anvende. Pass på å bare skrive om det du bruker i analysen eller i tolkningen av datamaterialet.
++ Something about how we want to structure the rest of the report.
++ Fix that goal, motivation, question and hypothesis are not clear. Second paragraph is crap.
++ How we structure the rest of the report.
++ Attention \cite{Bahdanau2015}, BERT and similar when we hopefully begin using it.
 
 \section{Method}
 
-I dette kapitlet skal du skrive om hvordan du har gått frem metodisk, og vise hvordan valg av design og metode egner seg til å svare på problemstillingen din.
+% I dette kapitlet skal du skrive om hvordan du har gått frem metodisk, og vise hvordan valg av design og metode egner seg til å svare på problemstillingen din.
+% Kapitlet må kunne gi svar på disse spørsmålene:
+% Hvordan samlet du inn datamaterialet?
+% Hvordan behandlet du dataene du samlet inn?
+% Hvorfor valgte du disse metodene?
+% Hva er styrkene og svakehetene ved disse metodene?
+% Du skal også si noe om hvorfor du har gjort din undersøkelse på den måten du gjorde – og da peke på styrker og svakheter. I tillegg skal du drøfte etiske aspekter ved prosjektet. På den måten viser du at du har kommet frem til resultatene på en pålitelig og troverdig måte, men også at du er reflektert og kritisk overfor arbeidet du har gjort.
+% Husk også at du her, slik som i teorikapitlet, bare skal skrive om det metodiske som er relevant for din studie.
 
-Kapitlet må kunne gi svar på disse spørsmålene:
+\section{Data}
 
-Hvordan samlet du inn datamaterialet?
-Hvordan behandlet du dataene du samlet inn?
-Hvorfor valgte du disse metodene?
-Hva er styrkene og svakehetene ved disse metodene?
-Du skal også si noe om hvorfor du har gjort din undersøkelse på den måten du gjorde – og da peke på styrker og svakheter. I tillegg skal du drøfte etiske aspekter ved prosjektet. På den måten viser du at du har kommet frem til resultatene på en pålitelig og troverdig måte, men også at du er reflektert og kritisk overfor arbeidet du har gjort.
+% + Data in Norwegian is not readily available, this is one of the primary challenges.
+% + Facebook Messenger data dump.
+% + Movie scripts. Copyright unclear.
 
-Husk også at du her, slik som i teorikapitlet, bare skal skrive om det metodiske som er relevant for din studie.
+\section{Related Work}
 
-\section{Analysis}
+Multiple Norwegian chatbots already exist. However, these are usually systems which first map
+the user query to a predefined intent, and then retrieve an answer from a list of answers
+belonging to the intent. Such systems require a fair amount of manual training, and lack
+the ability to independently formulate an answer independently, based only on the question.
+In this report, we describe a generative chatbot which is based on an unsupervised model.
 
-Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine. Analysedelen av oppgaven blir ofte kalt resultater, slik som i IMRoD-modellen.
+\section{Implementation}
 
-I kvantitative studier vil du kanskje i tillegg til å presentere funnene skriflig, bruke figurer og tabeller for å gi leseren en oversikt og innsikt i hva du har gjort.
-I empirisk baserte studier vil analysene handle om å beskrive og tolke. Mange vil ofte drøfte enkeltfunnene i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
+% Architecture \ Experimental Setup
 
+\section{Results}
 
-\section{Discussion}
+% Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine. Analysedelen av oppgaven blir ofte kalt resultater, slik som i IMRoD-modellen.
+% I kvantitative studier vil du kanskje i tillegg til å presentere funnene skriflig, bruke figurer og tabeller for å gi leseren en oversikt og innsikt i hva du har gjort.
+% I empirisk baserte studier vil analysene handle om å beskrive og tolke. Mange vil ofte drøfte enkeltfunnene i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
 
-Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å drøfte vil si å:
+\section{Discussion / Evaluation}
 
-sette ulike synspunkter, momenter, argumenter, faktorer og årsaker opp mot hverandre
-vurdere og sette dem opp mot hverandre. Finnes det flere ulike tolkninger av resultatene?
+% Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å drøfte vil si å:
+% sette ulike synspunkter, momenter, argumenter, faktorer og årsaker opp mot hverandre
+% vurdere og sette dem opp mot hverandre. Finnes det flere ulike tolkninger av resultatene?
 
-\section{Conclusion}
+\section{Conclusions}
 
-Om avslutningen din skal være en konklusjon eller en oppsummering, avhenger av problemstillingen din. En konklusjon skal svare på problemstillingen, mens en oppsummering gjentar det viktigste fra oppgaven. Det er ikke uvanlig å velge en kombinasjon av de to, hvor du både oppsummerer oppgaven kort, men også svarer på problemstillingen.
+% Om avslutningen din skal være en konklusjon eller en oppsummering, avhenger av problemstillingen din. En konklusjon skal svare på problemstillingen, mens en oppsummering gjentar det viktigste fra oppgaven. Det er ikke uvanlig å velge en kombinasjon av de to, hvor du både oppsummerer oppgaven kort, men også svarer på problemstillingen.
+% Det er lurt å la avslutningen speile innledningen, ved å si hva du har gjort. Avslutningen bør også sette oppgaven din i et større perspektiv, og peke på hvilke muligheter du ser ut fra ditt prosjekt. Hvilke bidrag har din undersøke gitt til faget? Er det noe som burde blitt studert ytterligere? Slik tar du utgangspunkt i ditt eget prosjekt og peker på mulighet for oppfølging.
 
-Det er lurt å la avslutningen speile innledningen, ved å si hva du har gjort. Avslutningen bør også sette oppgaven din i et større perspektiv, og peke på hvilke muligheter du ser ut fra ditt prosjekt. Hvilke bidrag har din undersøke gitt til faget? Er det noe som burde blitt studert ytterligere? Slik tar du utgangspunkt i ditt eget prosjekt og peker på mulighet for oppfølging.
+\printbibliography
 
 \end{document}
