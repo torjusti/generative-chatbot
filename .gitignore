@@ -8,6 +8,10 @@ corpus
 *.fls
 *.pdf
 *.gz
+*.bbl
+*.bcf
+*.blg
+*.xml
 
 # Model files
 *.h5
