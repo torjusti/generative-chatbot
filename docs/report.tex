@@ -21,24 +21,33 @@
 
 \section{Introduction}
 
-A chatbot is a computer system which can interact with an user through natural language. Because
+A chatbot is a computer system which can interact with an user through natural languge. Because
 humans tend to prefer more human-like interfaces, chatbots can be very useful in applications
 such as customer support, education, and personal productivity systems like Google Assistant.
-However, most research on such systems concern chatbots which converse in English.
+This project concerns such chatbots which converse specifically using the Norwwegian language.
 
-In this project, we explore chatbots which utilise the Norwegian language, with the goal of
-verifying that conventional chatbot-creation techniques also can function adequately in
-Norwegian. The Norwegian languge has a syntactic structure which differs from English, and
-the task is further complicated by the lack of training data available in Norwegian.
+Most research on chatbot systems concerns chatbots which converse in English. However, Norwegian
+has a syntactic structure which differs from that of English. Therefore, it is not guaranteed that
+this research automatically applies to Norwegian chatbots as well. Additionally, further problems
+arise from the fact that training data in Norwegian is not as abundant as for English.
 
-We especially want to verify that deep learning techniques such as sequence-to-sequence
-models can be used to create general-purpose Norwegian chatbots, which for example could be used
-as a smalltalk moule in another more domain-specific chatbot. We do this by implementing a simple
-Norwegian chatbot using a sequence-to-sequence \cite{Cho2014} model.
+In this project, we explore Norwegian chatbots, with the goal of verifying that conventional
+chatbot-creation techniques also can function adequately in Norwegian. We especially want to
+verify that deep learning techniques such as sequence-to-sequence models \cite{Cho2014} can be
+used to create general-purpose Norwegian chatbots. Such models are usually used for machine
+translation, but they have also proven efective in the field of chatbots. The main objective
+of this project is therefore to implement a simple Norwegian chatbot using a sequence-to-sequence
+model, which for example could be used as a smalltalk module in another mode domain-specific chatbot.
+
+We differ between retrieval-based and generative chatbots. A retrieval-based system usually map
+an user input to a predefined intent, and then retrieve an answer from a set of answers belonging
+to the detected intent. A generative system does not rely on such predefined sets of answers.
+Instead, they are able to automatically generate an answer to the provided query. In this project,
+we restrict ourselves to the latter kind of model. We also restrict ourselves to an user-initiative
+only model, which means that the chatbot simply responds with an answer to each user query.
 
 + Something about how we want to structure the rest of the report.
-+ Fix that goal, motivation, question and hypothesis are not clear. Second paragraph is crap.
-+ How we structure the rest of the report.
++ Fix that goal, motivation, question and hypothesis are not clear.
 + Attention \cite{Bahdanau2015}, BERT and similar when we hopefully begin using it.
 
 \section{Method}
