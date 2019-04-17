@@ -4,7 +4,8 @@ import numpy as np
 import os
 from collections import defaultdict
 
-from data import get_utterance_pairs, TokenMapper, pad_tokens, tokenize, START_UTTERANCE, END_UTTERANCE, UNKNOWN_TOKEN, PAD_TOKEN
+from data import (get_utterance_pairs, TokenMapper, pad_tokens, tokenize, wrap_utterance, START_UTTERANCE,
+END_UTTERANCE, UNKNOWN_TOKEN, PAD_TOKEN, filter_unknown)
 
 
 LATENT_DIM = 256
@@ -29,9 +30,17 @@ class Chatbot():
         self.input_mapper = TokenMapper(self.input_utterances)
         self.target_mapper = TokenMapper(self.target_utterances)
 
+        # Filter out unknown tokens from training data for testing purposes.
+        self.input_utterances, self.target_utterances = filter_unknown(self.input_utterances, self.target_utterances,
+                                                                       self.input_mapper, self.target_mapper)
+
         # The longest utterances which occur in the data.
         self.max_encoder_seq_length = max(len(utterance) for utterance in self.input_utterances)
         self.max_decoder_seq_length = max(len(utterance) for utterance in self.target_utterances)
+
+        # Pad tokens to the maximum length.
+        self.input_utterances = [pad_tokens(tokens, self.max_encoder_seq_length) for tokens in self.input_utterances]
+        self.target_utterances = [pad_tokens(tokens, self.max_encoder_seq_length) for tokens in self.target_utterances]
 
         # The number of different tokens in the data.
         self.num_encoder_tokens = len(self.input_mapper.tok2num)
@@ -57,6 +66,7 @@ class Chatbot():
                     # the special token marking the start of an utterance is
                     # no longer included.
                     self.decoder_target_data[i, k-1, self.target_mapper.tok2num[token]] = 1
+
 
     def __build_model(self):
 
@@ -146,7 +156,7 @@ class Chatbot():
         self.model.summary()
 
     def reply(self, input_query):
-        tokens = pad_tokens(tokenize(input_query), self.max_encoder_seq_length)
+        tokens = pad_tokens(wrap_utterance(tokenize(input_query)), self.max_encoder_seq_length)
 
         # Map each token to a number.
         input_sequence = [self.target_mapper.tok2num[token] for token in tokens]
@@ -166,7 +176,6 @@ class Chatbot():
             token_idx = np.argmax(output_tokens[0, -1, :])
             print(token_idx, self.target_mapper.num2tok[token_idx])
 
-            print(output_tokens[0, -1, 1092])
             word = self.target_mapper.num2tok[token_idx]
 
 

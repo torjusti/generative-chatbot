@@ -11,3 +11,4 @@ Generative chatbot project created during the course TDT4310.
 | TARGET_USER         | Only use this username to generate responses.     | Torjus Iveland | None          |
 | VERIFY_UTTERANCES   | Check the quality of utterances.                  | False          | True          |
 | REMOVE_SELF_REPLIES | Filter away self-responses.                       | False          | True          |
+| MAX_VOCABULARY_SIZE | Max number of different tokens to consider.       | 7500           | 5000          |

@@ -8,10 +8,14 @@ import nltk
 # Set max number of tokens allowed in a sentence.
 # Sentences above this limit are completely excluded
 # from the training data.
-MAX_NUM_TOKENS = os.getenv('MAX_NUM_TOKENS', 50)
+MAX_NUM_TOKENS = os.getenv('MAX_NUM_TOKENS', 20)
 
 # Set the maximum number of utterances to load.
-MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 5000)
+MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 250000)
+
+# The maximum number of words which are considered. This value
+# is the number of most common words which get included in embedding.
+MAX_VOCABULARY_SIZE = os.getenv('MAX_VOCABULARY_SIZE', 5000)
 
 # If specifified, only tweets from this user name will be used as replies.
 TARGET_USER = os.getenv('TARGET_USER', None)
@@ -97,13 +101,17 @@ def verify_utterance(tokens):
 def get_utterance_pairs():
     ''' Load utterances and split them into questions and answers. '''
     # Load utterances from file.
-    utterances = load_utterances()[:MAX_NUM_UTTERANCES]
+    utterances = load_utterances()
 
     # Lists for input utterances with corresponding output utterances.
     input_utterances, target_utterances = [], []
 
     # Loop through all utterances, starting at the second line.
     for i, utterance in enumerate(utterances[1:], 1):
+        # Stop when max number of utterances is reached.
+        if len(input_utterances) == MAX_NUM_UTTERANCES:
+            break
+
         # Tokenize input and target utterances.
         input_tokens, target_tokens = map(tokenize, (utterances[i-1]['content'], utterance['content']))
 
@@ -120,7 +128,7 @@ def get_utterance_pairs():
             continue
 
         # Add input utterance to list.
-        input_utterances.append(input_tokens)
+        input_utterances.append(wrap_utterance(input_tokens))
 
         # Add corresponding output utterance.
         target_utterances.append(wrap_utterance(target_tokens))
@@ -142,8 +150,11 @@ def get_unknown_token():
 def get_word_map(corpus):
     ''' Create mapping between tokens and an unique number for each
     token, and vice versa. '''
-    # Find tokens from all utterances in the corpus.
-    tokens = set(token for utterance in corpus for token in utterance)
+    # Count occurences of tokens in corpus.
+    token_counts = collections.Counter(token for utterance in corpus for token in utterance)
+
+    # Only consider the most commonly used tokens.
+    tokens = [entry[0] for entry in token_counts.most_common(MAX_VOCABULARY_SIZE)]
 
     # Map tokens to an unique number. Assign all unknown
     # tokens to the same value. We use the number 0 for
@@ -167,6 +178,20 @@ def get_word_map(corpus):
     return token_to_num, num_to_token
 
 
+def filter_unknown(input_utterances, target_utterances, input_mapper, target_mapper):
+    updated_input_utterances, updated_target_utterances = [], []
+
+    for input_utterance, target_utterance in zip(input_utterances, target_utterances):
+        input_utterance = [token for token in input_utterance if token in input_mapper.tok2num]
+        target_utterance = [token for token in target_utterance if token in target_mapper.tok2num]
+
+        if  input_utterance and target_utterance:
+            updated_input_utterances.append(input_utterance)
+            updated_target_utterances.append(target_utterance)
+
+    return input_utterances, target_utterances
+
+
 class TokenMapper():
     def __init__(self, utterances):
         ''' Create a word map for the utterances and add special tokens. '''
@@ -185,3 +210,4 @@ class TokenMapper():
         if token not in self.tok2num:
             self.tok2num[token] = len(self.num2tok)
             self.num2tok[len(self.num2tok)] = token
+
