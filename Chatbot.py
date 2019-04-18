@@ -10,7 +10,7 @@ END_UTTERANCE, UNKNOWN_TOKEN, PAD_TOKEN, filter_unknown)
 
 LATENT_DIM = 256
 BATCN_SIZE = 64
-NUM_EPOCHS = 10
+NUM_EPOCHS = 25
 DROPOUT_RATE = 0.2
 MODEL_PATH = 'models/model.h5'
 
@@ -57,7 +57,7 @@ class Chatbot():
 
             for k, token in enumerate(target_utterance):
                 # One-hot encoding for decoder input data.
-                self.decoder_input_data[i][j] = self.input_mapper.tok2num[token]
+                self.decoder_input_data[i][k] = self.target_mapper.tok2num[token]
 
                 if k > 0:
                     # One-hot encoding for decoder targets. This is the same
