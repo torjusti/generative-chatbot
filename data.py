@@ -13,7 +13,7 @@ MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 250000)
 
 # The maximum number of words which are considered. This value
 # is the number of most common words which get included in embedding.
-MAX_VOCABULARY_SIZE = os.getenv('MAX_VOCABULARY_SIZE', 200)
+MAX_VOCABULARY_SIZE = os.getenv('MAX_VOCABULARY_SIZE', 1000)
 
 # If specifified, only tweets from this user name will be used as replies.
 TARGET_USER = os.getenv('TARGET_USER', None)
@@ -128,6 +128,9 @@ def get_utterance_pairs():
         # Tokenize input and target utterances.
         input_tokens, target_tokens = map(tokenize, (utterances[i-1]['content'], utterance['content']))
 
+        if len(input_tokens) == 0 or len(target_tokens) == 0:
+            continue
+
         # Check that the user of the target message is the target user, if set.
         if TARGET_USER != None and utterance['sender_name'] != TARGET_USER.lower():
             continue
@@ -201,7 +204,7 @@ def filter_unknown(input_utterances, target_utterances, input_mapper, target_map
         input_utterance = [token for token in input_utterance if token in input_mapper.tok2num]
         target_utterance = [token for token in target_utterance if token in target_mapper.tok2num]
 
-        if input_utterance and target_utterance:
+        if len(input_utterance) > 2 and len(target_utterance) > 2:
             # Add both input and output if they still contain tokens.
             updated_input_utterances.append(input_utterance)
             updated_target_utterances.append(target_utterance)
