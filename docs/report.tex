@@ -1,11 +1,11 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{parskip}
 \usepackage{biblatex}
+\usepackage{todonotes}
 
 \addbibresource{references.bib}
 
-\title{TDT4310 --- Project Assignment}
+\title{Language Agnostic Generative Chatbot using Personal Chatlog Data}
 \author{Torjus Iveland \& Vegar Andreas Bergum}
 \date{April 2019}
 
@@ -13,119 +13,182 @@
 
 \maketitle
 
-\section{Abstract}
+\begin{abstract}
 
 In this report, we describe the implementation of a simple chtbot system
 using sequence-to-sequence model. we find that
 
-+ What we researched.
-+ How we did it.
-+ What we found out.
+\if
+- What we researched.
+- How we did it.
+- What we found out.
+\fi
+\end{abstract}
 
 \section{Introduction}
 
-A chatbot is a computer system which can interact with an user through natural languge. Because
-humans tend to prefer more human-like interfaces, chatbots can be very useful in applications
-such as customer support, education, and personal productivity systems like Google Assistant.
-This project concerns such chatbots which converse specifically using the Norwwegian language.
+A chatbot is a computer system which can interact with an user through natural
+languge. Because humans tend to prefer more human-like interfaces, chatbots can
+be very useful in applications
+such as customer support, education, and personal productivity systems like
+Google Assistant.  This project concerns such chatbots which converse
+specifically using the Norwwegian language.
 
-Most research on chatbot systems concerns chatbots which converse in English. However, Norwegian
-has a syntactic structure which differs from that of English. Therefore, it is not guaranteed that
-this research automatically applies to Norwegian chatbots as well. Additionally, further problems
-arise from the fact that training data in Norwegian is not as abundant as for English.
+\paragraph{}
+Most research on chatbot systems concerns chatbots which converse in English.
+However, Norwegian has a syntactic structure which differs from that of
+English. Therefore, it is not guaranteed that this research automatically
+applies to Norwegian chatbots as well. Additionally, further problems arise
+from the fact that training data in Norwegian is not as abundant as for
+English.
 
-In this project, we explore Norwegian chatbots, with the goal of verifying that conventional
-chatbot-creation techniques also can function adequately in Norwegian. We especially want to
-verify that deep learning techniques such as sequence-to-sequence models \cite{Cho2014} can be
-used to create general-purpose Norwegian chatbots. Such models are usually used for machine
-translation, but they have also proven efective in the field of chatbots. The main objective
-of this project is therefore to implement a simple Norwegian chatbot using a sequence-to-sequence
-model, which for example could be used as a smalltalk module in another mode domain-specific chatbot.
+\paragraph{}
+In this project, we explore Norwegian chatbots, with the goal of verifying that
+conventional chatbot-creation techniques also can function adequately in
+Norwegian. We especially want to verify that deep learning techniques such as
+sequence-to-sequence models \cite{Cho2014} can be used to create
+general-purpose Norwegian chatbots. Such models are usually used for machine
+translation, but they have also proven efective in the field of chatbots. The
+main objective of this project is therefore to implement a simple Norwegian
+chatbot using a sequence-to-sequence model, which for example could be used as
+a smalltalk module in another mode domain-specific chatbot.
 
-We differ between retrieval-based and generative chatbots. A retrieval-based system usually map
-an user input to a predefined intent, and then retrieve an answer from a set of answers belonging
-to the detected intent. A generative system does not rely on such predefined sets of answers.
-Instead, they are able to automatically generate an answer to the provided query. In this project,
-we restrict ourselves to the latter kind of model. We also restrict ourselves to an user-initiative
-only model, which means that the chatbot simply responds with an answer to each user query.
+\paragraph{}
+We differ between retrieval-based and generative chatbots. A retrieval-based
+system usually map an user input to a predefined intent, and then retrieve an
+answer from a set of answers belonging to the detected intent. A generative
+system does not rely on such predefined sets of answers.  Instead, they are
+able to automatically generate an answer to the provided query. In this
+project, we restrict ourselves to the latter kind of model. We also restrict
+ourselves to an user-initiative only model, which means that the chatbot simply
+responds with an answer to each user query.
 
-+ Something about how we want to structure the rest of the report.
-+ Fix that goal, motivation, question and hypothesis are not clear.
-+ Attention \cite{Bahdanau2015}, BERT and similar when we hopefully begin using it.
+\if
+- Something about how we want to structure the rest of the report.  
+- Fix that goal, motivation, question and hypothesis are not clear.  
+- Attention \cite{Bahdanau2015}, BERT and similar when we hopefully begin using it.
+\fi
 
 \section{Method}
 
-% I dette kapitlet skal du skrive om hvordan du har gått frem metodisk, og vise hvordan valg av design og metode egner seg til å svare på problemstillingen din.
-% Kapitlet må kunne gi svar på disse spørsmålene:
-% Hvordan samlet du inn datamaterialet?
-% Hvordan behandlet du dataene du samlet inn?
-% Hvorfor valgte du disse metodene?
-% Hva er styrkene og svakehetene ved disse metodene?
-% Du skal også si noe om hvorfor du har gjort din undersøkelse på den måten du gjorde – og da peke på styrker og svakheter. I tillegg skal du drøfte etiske aspekter ved prosjektet. På den måten viser du at du har kommet frem til resultatene på en pålitelig og troverdig måte, men også at du er reflektert og kritisk overfor arbeidet du har gjort.
-% Husk også at du her, slik som i teorikapitlet, bare skal skrive om det metodiske som er relevant for din studie.
+% I dette kapitlet skal du skrive om hvordan du har gått frem metodisk, og vise
+% hvordan valg av design og metode egner seg til å svare på problemstillingen
+% din.  Kapitlet må kunne gi svar på disse spørsmålene: Hvordan samlet du inn
+% datamaterialet?  Hvordan behandlet du dataene du samlet inn?  Hvorfor valgte
+% du disse metodene?  Hva er styrkene og svakehetene ved disse metodene?  Du
+% skal også si noe om hvorfor du har gjort din undersøkelse på den måten du
+% gjorde – og da peke på styrker og svakheter. I tillegg skal du drøfte etiske
+% aspekter ved prosjektet. På den måten viser du at du har kommet frem til
+% resultatene på en pålitelig og troverdig måte, men også at du er reflektert
+% og kritisk overfor arbeidet du har gjort.  Husk også at du her, slik som i
+% teorikapitlet, bare skal skrive om det metodiske som er relevant for din
+% studie.
+
+
+
+\if
+ - Prøvd ut pre-existing modeller med forskjellige datasett
+    - engelsk datasett som vi vet er av god kvalitet
+    - forskjellige attention-modeller
+ - Sammenlignet egne modeller og eget datasett mot dette
+ - Ressursbegrensning (datakraft og tid) har begrenset omfanget på evaluering
+ av forskjellige modeller
+ - 
+
+\fi
 
 \section{Data}
 
-Norwegian chatbot training data is not readily available, but relevant corpora still exist.
-For example, multiple spoken language corpora are available through the CLARINO project
-\cite{clarino-description}. Examples of CLARINO corpora which might prove useful for a chatbot
-project are the Big Brother corpus \cite{clarino-bb} and NoTa-Oslo \cite{clarino-nota}, which
-both provide spoken language annotations for he Norwegian language. However, both these corpora
-have quite restrictive licenses and are only accessible online for privacy reasons. Thus, the
-CLARINO corpora are not well suited for our chatbot usage.
+Norwegian chatbot training data is not readily available, but relevant corpora
+still exist.  For example, multiple spoken language corpora are available
+through the CLARINO project \cite{clarino-about}. Examples of CLARINO
+corpora which might prove useful for a chatbot project are the Big Brother
+corpus \cite{clarino-bb} and NoTa-Oslo \cite{clarino-nota}, which both provide
+spoken language annotations for he Norwegian language. However, both these
+corpora have quite restrictive licenses and are only accessible online for
+privacy reasons. Thus, the CLARINO corpora are not well suited for our chatbot
+usage.
 
-Another posible data source is to use exports of personal chatbot data from various
-online platforms, For example, Facebook allows users to export their private Messenger
-chat data. If all parties involved in a conversation consent, such data can be used to
-train a chatbot.
+\paragraph{}
+Another posible data source is to use exports of personal chatbot data from
+various online platforms, For example, Facebook allows users to export their
+private Messenger chat data. If all parties involved in a conversation consent,
+such data can be used to train a chatbot.
 
-+ Difficulties with chatbot data
-+ We use chatbot data, want to check if it is possible to use real chatlot data to create a language-agnostic bot
+\todo{skriv noe mer om hvordan vi bruker messenger data blabla}
 
-\section{Results}
+\paragraph{}
+In addition to using personal Facebook Messenger data, the Cornell Movie
+Dialogs Corpus \cite{cornell-corpus} has been used for model evaluation. The
+Cornell corpus consists of several hundreds of thousands utterances from movie
+scripts that are freely available. This corpus is frequently highlighted in
+chatbot models as a high quality data set.
 
-% Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine. Analysedelen av oppgaven blir ofte kalt resultater, slik som i IMRoD-modellen.
-% I kvantitative studier vil du kanskje i tillegg til å presentere funnene skriflig, bruke figurer og tabeller for å gi leseren en oversikt og innsikt i hva du har gjort.
-% I empirisk baserte studier vil analysene handle om å beskrive og tolke. Mange vil ofte drøfte enkeltfunnene i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
-
-\section{Discussion / Evaluation}
-
-% Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å drøfte vil si å:
-% sette ulike synspunkter, momenter, argumenter, faktorer og årsaker opp mot hverandre
-% vurdere og sette dem opp mot hadily available, this is one of the primary challenges.
-% + Facebook Messenger data dump.
-% + Clarino: Tried, but restrictive licenses.
-% + Movie scripts. Copyright unclear.
-
-\section{Related Work}
-
-Multiple Norwegian chatbots already exist. However, these are usually systems which first map
-the user query to a predefined intent, and then retrieve an answer from a list of answers
-belonging to the intent. Such systems require a fair amount of manual training, and lack
-the ability to independently formulate an answer independently, based only on the question.
-In this report, we describe a generative chatbot which is based on an unsupervised model.
+\if
+- Difficulties with chatbot data 
+- We use chatbot data, want to check if it is possible to use real chatlot data
+to create a language-agnostic bot 
+\fi
 
 \section{Implementation}
 
-+ seq2seq
-+ preprocessing of norwegian data - describe stack
-+ teacher forcing
+\if
+- seq2seq 
+- preprocessing of norwegian data - describe stack 
+- teacher forcing
+\fi
 
-% Architecture \ Experimental Setup
-% + Teacher forcing
-% Future work: Bert/custom embeddings, embedding layer, bidirectional model, beam search
+% Architecture \ Experimental Setup + Teacher forcing Future work: Bert/custom
+% embeddings, embedding layer, bidirectional model, beam search
 
 \section{Results}
 
-% Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine. Analysedelen av oppgaven blir ofte kalt resultater, slik som i IMRoD-modellen.
-% I kvantitative studier vil du kanskje i tillegg til å presentere funnene skriflig, bruke figurer og tabeller for å gi leseren en oversikt og innsikt i hva du har gjort.
-% I empirisk baserte studier vil analysene handle om å beskrive og tolke. Mange vil ofte drøfte enkeltfunnene i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
+% Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine.
+% Analysedelen av oppgaven blir ofte kalt resultater, slik som i
+% IMRoD-modellen.  I kvantitative studier vil du kanskje i tillegg til å
+% presentere funnene skriflig, bruke figurer og tabeller for å gi leseren en
+% oversikt og innsikt i hva du har gjort.  I empirisk baserte studier vil
+% analysene handle om å beskrive og tolke. Mange vil ofte drøfte enkeltfunnene
+% i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
 
 \section{Discussion / Evaluation}
 
-% Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å drøfte vil si å:
-% sette ulike synspunkter, momenter, argumenter, faktorer og årsaker opp mot hverandre
-% vurdere og sette dem opp mot hverandre. Finnes det flere ulike tolkninger av resultatene?
+% Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å
+% drøfte vil si å: sette ulike synspunkter, momenter, argumenter, faktorer og
+% årsaker opp mot hverandre vurdere og sette dem opp mot hadily available, this
+% is one of the primary challenges.  + Facebook Messenger data dump.  +
+% Clarino: Tried, but restrictive licenses.  + Movie scripts. Copyright
+% unclear.
+
+\section{Related Work}
+
+Multiple Norwegian chatbots already exist. However, these are usually systems
+which first map the user query to a predefined intent, and then retrieve an
+answer from a list of answers belonging to the intent. Such systems require a
+fair amount of manual training, and lack the ability to independently formulate
+an answer independently, based only on the question.  In this report, we
+describe a generative chatbot which is based on an unsupervised model.
+
+
+\section{Results}
+
+% Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine.
+% Analysedelen av oppgaven blir ofte kalt resultater, slik som i
+% IMRoD-modellen.  I kvantitative studier vil du kanskje i tillegg til å
+% presentere funnene skriflig, bruke figurer og tabeller for å gi leseren en
+% oversikt og innsikt i hva du har gjort.  I empirisk baserte studier vil
+% analysene handle om å beskrive og tolke. Mange vil ofte drøfte enkeltfunnene
+% i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
+
+\section{Discussion / Evaluation}
+
+% Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å
+% drøfte vil si å: sette ulike synspunkter, momenter, argumenter, faktorer og
+% årsaker opp mot hverandre vurdere og sette dem opp mot hverandre. Finnes det
+% flere ulike tolkninger av resultatene?
+
+% heavily biased dataset bad training data, not so much training data simple
+% model
 
 % heavily biased dataset
 % bad training data, not so much training data
@@ -133,8 +196,16 @@ In this report, we describe a generative chatbot which is based on an unsupervis
 
 \section{Conclusions}
 
-% Om avslutningen din skal være en konklusjon eller en oppsummering, avhenger av problemstillingen din. En konklusjon skal svare på problemstillingen, mens en oppsummering gjentar det viktigste fra oppgaven. Det er ikke uvanlig å velge en kombinasjon av de to, hvor du både oppsummerer oppgaven kort, men også svarer på problemstillingen.
-% Det er lurt å la avslutningen speile innledningen, ved å si hva du har gjort. Avslutningen bør også sette oppgaven din i et større perspektiv, og peke på hvilke muligheter du ser ut fra ditt prosjekt. Hvilke bidrag har din undersøke gitt til faget? Er det noe som burde blitt studert ytterligere? Slik tar du utgangspunkt i ditt eget prosjekt og peker på mulighet for oppfølging.
+% Om avslutningen din skal være en konklusjon eller en oppsummering, avhenger
+% av problemstillingen din. En konklusjon skal svare på problemstillingen, mens
+% en oppsummering gjentar det viktigste fra oppgaven. Det er ikke uvanlig å
+% velge en kombinasjon av de to, hvor du både oppsummerer oppgaven kort, men
+% også svarer på problemstillingen.  Det er lurt å la avslutningen speile
+% innledningen, ved å si hva du har gjort. Avslutningen bør også sette oppgaven
+% din i et større perspektiv, og peke på hvilke muligheter du ser ut fra ditt
+% prosjekt. Hvilke bidrag har din undersøke gitt til faget? Er det noe som
+% burde blitt studert ytterligere? Slik tar du utgangspunkt i ditt eget
+% prosjekt og peker på mulighet for oppfølging.
 
 \printbibliography
 
