@@ -1,11 +1,11 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{parskip}
 \usepackage{biblatex}
+\usepackage{todonotes}
 
 \addbibresource{references.bib}
 
-\title{TDT4310 --- Project Assignment}
+\title{Language Agnostic Generative Chatbot using Personal Chatlog Data}
 \author{Torjus Iveland \& Vegar Andreas Bergum}
 \date{April 2019}
 
@@ -13,14 +13,17 @@
 
 \maketitle
 
-\section{Abstract}
+\begin{abstract}
 
 In this report, we describe the implementation of a simple chtbot system
 using sequence-to-sequence model. we find that
 
-+ What we researched.
-+ How we did it.
-+ What we found out.
+\if
+- What we researched.
+- How we did it.
+- What we found out.
+\fi
+\end{abstract}
 
 \section{Introduction}
 
@@ -31,6 +34,7 @@ such as customer support, education, and personal productivity systems like
 Google Assistant.  This project concerns such chatbots which converse
 specifically using the Norwwegian language.
 
+\paragraph{}
 Most research on chatbot systems concerns chatbots which converse in English.
 However, Norwegian has a syntactic structure which differs from that of
 English. Therefore, it is not guaranteed that this research automatically
@@ -38,6 +42,7 @@ applies to Norwegian chatbots as well. Additionally, further problems arise
 from the fact that training data in Norwegian is not as abundant as for
 English.
 
+\paragraph{}
 In this project, we explore Norwegian chatbots, with the goal of verifying that
 conventional chatbot-creation techniques also can function adequately in
 Norwegian. We especially want to verify that deep learning techniques such as
@@ -48,6 +53,7 @@ main objective of this project is therefore to implement a simple Norwegian
 chatbot using a sequence-to-sequence model, which for example could be used as
 a smalltalk module in another mode domain-specific chatbot.
 
+\paragraph{}
 We differ between retrieval-based and generative chatbots. A retrieval-based
 system usually map an user input to a predefined intent, and then retrieve an
 answer from a set of answers belonging to the detected intent. A generative
@@ -57,9 +63,11 @@ project, we restrict ourselves to the latter kind of model. We also restrict
 ourselves to an user-initiative only model, which means that the chatbot simply
 responds with an answer to each user query.
 
-+ Something about how we want to structure the rest of the report.  + Fix that
-goal, motivation, question and hypothesis are not clear.  + Attention
-\cite{Bahdanau2015}, BERT and similar when we hopefully begin using it.
+\if
+- Something about how we want to structure the rest of the report.  
+- Fix that goal, motivation, question and hypothesis are not clear.  
+- Attention \cite{Bahdanau2015}, BERT and similar when we hopefully begin using it.
+\fi
 
 \section{Method}
 
@@ -76,11 +84,24 @@ goal, motivation, question and hypothesis are not clear.  + Attention
 % teorikapitlet, bare skal skrive om det metodiske som er relevant for din
 % studie.
 
+
+
+\if
+ - Prøvd ut pre-existing modeller med forskjellige datasett
+    - engelsk datasett som vi vet er av god kvalitet
+    - forskjellige attention-modeller
+ - Sammenlignet egne modeller og eget datasett mot dette
+ - Ressursbegrensning (datakraft og tid) har begrenset omfanget på evaluering
+ av forskjellige modeller
+ - 
+
+\fi
+
 \section{Data}
 
 Norwegian chatbot training data is not readily available, but relevant corpora
 still exist.  For example, multiple spoken language corpora are available
-through the CLARINO project \cite{clarino-description}. Examples of CLARINO
+through the CLARINO project \cite{clarino-about}. Examples of CLARINO
 corpora which might prove useful for a chatbot project are the Big Brother
 corpus \cite{clarino-bb} and NoTa-Oslo \cite{clarino-nota}, which both provide
 spoken language annotations for he Norwegian language. However, both these
@@ -88,13 +109,37 @@ corpora have quite restrictive licenses and are only accessible online for
 privacy reasons. Thus, the CLARINO corpora are not well suited for our chatbot
 usage.
 
+\paragraph{}
 Another posible data source is to use exports of personal chatbot data from
 various online platforms, For example, Facebook allows users to export their
 private Messenger chat data. If all parties involved in a conversation consent,
 such data can be used to train a chatbot.
 
-+ Difficulties with chatbot data + We use chatbot data, want to check if it is
-possible to use real chatlot data to create a language-agnostic bot
+\todo{skriv noe mer om hvordan vi bruker messenger data blabla}
+
+\paragraph{}
+In addition to using personal Facebook Messenger data, the Cornell Movie
+Dialogs Corpus \cite{cornell-corpus} has been used for model evaluation. The
+Cornell corpus consists of several hundreds of thousands utterances from movie
+scripts that are freely available. This corpus is frequently highlighted in
+chatbot models as a high quality data set.
+
+\if
+- Difficulties with chatbot data 
+- We use chatbot data, want to check if it is possible to use real chatlot data
+to create a language-agnostic bot 
+\fi
+
+\section{Implementation}
+
+\if
+- seq2seq 
+- preprocessing of norwegian data - describe stack 
+- teacher forcing
+\fi
+
+% Architecture \ Experimental Setup + Teacher forcing Future work: Bert/custom
+% embeddings, embedding layer, bidirectional model, beam search
 
 \section{Results}
 
@@ -124,12 +169,6 @@ fair amount of manual training, and lack the ability to independently formulate
 an answer independently, based only on the question.  In this report, we
 describe a generative chatbot which is based on an unsupervised model.
 
-\section{Implementation}
-
-+ seq2seq + preprocessing of norwegian data - describe stack + teacher forcing
-
-% Architecture \ Experimental Setup + Teacher forcing Future work: Bert/custom
-% embeddings, embedding layer, bidirectional model, beam search
 
 \section{Results}
 
