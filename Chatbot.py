@@ -113,7 +113,10 @@ class Chatbot():
             self.input_mapper.tok2num = np.load('models/input_mapper_tok2num.npy').item()
             self.input_mapper.num2tok = np.load('models/input_mapper_num2tok.npy').item()
 
-            return self.model.load_weights(MODEL_PATH)
+            self.model.load_weights(MODEL_PATH)
+
+            if 'INITIAL_EPOCH' not in os.environ:
+                return
 
         # Save token mappers.
         np.save('models/target_mapper_tok2num.npy', self.target_mapper.tok2num)
@@ -124,7 +127,9 @@ class Chatbot():
         self.model.fit([self.encoder_input_data, self.decoder_input_data], self.decoder_target_data,
                         batch_size=BATCN_SIZE,
                         epochs=NUM_EPOCHS,
-                        validation_split=0.2)
+                        validation_split=0.2,
+                        initial_epoch=int(os.getenv('INITIAL_EPOCH', 1))
+                        )
 
         self.model.save_weights(MODEL_PATH)
 
