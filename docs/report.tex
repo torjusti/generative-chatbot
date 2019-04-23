@@ -66,8 +66,35 @@ only model, which means that the chatbot simply responds with an answer to each 
 
 \section{Data}
 
-% + Data in Norwegian is not readily available, this is one of the primary challenges.
+Norwegian chatbot training data is not readily available, but relevant corpora still exist.
+For example, multiple spoken language corpora are available through the CLARINO project
+\cite{clarino-description}. Examples of CLARINO corpora which might prove useful for a chatbot
+project are the Big Brother corpus \cite{clarino-bb} and NoTa-Oslo \cite{clarino-nota}, which
+both provide spoken language annotations for he Norwegian language. However, both these corpora
+have quite restrictive licenses and are only accessible online for privacy reasons. Thus, the
+CLARINO corpora are not well suited for our chatbot usage.
+
+Another posible data source is to use exports of personal chatbot data from various
+online platforms, For example, Facebook allows users to export their private Messenger
+chat data. If all parties involved in a conversation consent, such data can be used to
+train a chatbot.
+
++ Difficulties with chatbot data
++ We use chatbot data, want to check if it is possible to use real chatlot data to create a language-agnostic bot
+
+\section{Results}
+
+% Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine. Analysedelen av oppgaven blir ofte kalt resultater, slik som i IMRoD-modellen.
+% I kvantitative studier vil du kanskje i tillegg til å presentere funnene skriflig, bruke figurer og tabeller for å gi leseren en oversikt og innsikt i hva du har gjort.
+% I empirisk baserte studier vil analysene handle om å beskrive og tolke. Mange vil ofte drøfte enkeltfunnene i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
+
+\section{Discussion / Evaluation}
+
+% Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å drøfte vil si å:
+% sette ulike synspunkter, momenter, argumenter, faktorer og årsaker opp mot hverandre
+% vurdere og sette dem opp mot hadily available, this is one of the primary challenges.
 % + Facebook Messenger data dump.
+% + Clarino: Tried, but restrictive licenses.
 % + Movie scripts. Copyright unclear.
 
 \section{Related Work}
@@ -80,7 +107,13 @@ In this report, we describe a generative chatbot which is based on an unsupervis
 
 \section{Implementation}
 
++ seq2seq
++ preprocessing of norwegian data - describe stack
++ teacher forcing
+
 % Architecture \ Experimental Setup
+% + Teacher forcing
+% Future work: Bert/custom embeddings, embedding layer, bidirectional model, beam search
 
 \section{Results}
 
@@ -93,6 +126,10 @@ In this report, we describe a generative chatbot which is based on an unsupervis
 % Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å drøfte vil si å:
 % sette ulike synspunkter, momenter, argumenter, faktorer og årsaker opp mot hverandre
 % vurdere og sette dem opp mot hverandre. Finnes det flere ulike tolkninger av resultatene?
+
+% heavily biased dataset
+% bad training data, not so much training data
+% simple model
 
 \section{Conclusions}
 
