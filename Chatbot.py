@@ -22,30 +22,33 @@ DROPOUT_RATE = 0.2
 MODEL_PATH = 'models/model.h5'
 
 
-class BahdanauAttention(tf.keras.Model):
-  def __init__(self, units):
-    super(BahdanauAttention, self).__init__()
-    self.W1 = tf.keras.layers.Dense(units)
-    self.W2 = tf.keras.layers.Dense(units)
-    self.V = tf.keras.layers.Dense(1)
+class BahdanauAttention(Model):
+  def __init__(self, units, name=None):
+    super(BahdanauAttention, self).__init__(name=name)
+    self.W1 = Dense(units)
+    self.W2 = Dense(units)
+    self.V = Dense(1)
 
-  def call(self, query, values):
+  def __call__(self, query, values):
     # hidden shape == (batch_size, hidden size)
-    # hidden_with_time_axis shape == (batch_size, 1, hidden size)
+    # hidden_with_time_axis shape == (batch_size, 1, hiddembeden size)
     # we are doing this to perform addition to calculate the score
-    hidden_with_time_axis = tf.expand_dims(query, 1)
+    #hidden_with_time_axis = K.expand_dims(query, 1)
+    ones_tensor = Lambda(lambda x: K.ones_like(x))(query)
+    ones_tensor = ones_tensor[:, 0]
+    hidden_with_time_axis = Lambda(lambda x: K.expand_dims(x, axis=1))(ones_tensor)
 
     # score shape == (batch_size, max_length, hidden_size)
-    score = self.V(tf.nn.tanh(
-        self.W1(values) + self.W2(hidden_with_time_axis)))
+    score = self.V(Dense(1, activation='tanh')(Add()([self.W1(values), self.W2(hidden_with_time_axis)])))
+    #score = self.V(K.tanh(self.W1(values) + self.W2(hidden_with_time_axis)))
 
     # attention_weights shape == (batch_size, max_length, 1)
     # we get 1 at the last axis because we are applying score to self.V
-    attention_weights = tf.nn.softmax(score, axis=1)
+    attention_weights = Dense(units=1, activation='softmax')(score)
 
     # context_vector shape after sum == (batch_size, hidden_size)
-    context_vector = attention_weights * values
-    context_vector = tf.reduce_sum(context_vector, axis=1)
+    context_vector = Multiply()([attention_weights, values])
+    context_vector = Lambda(lambda x: K.sum(x, axis=1))(context_vector)
 
     return context_vector, attention_weights
 
