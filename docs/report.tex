@@ -189,18 +189,23 @@ to limited available computational power. However, an analysis of the dataset
 shows that only about 4\% of the utterances are above this limit. Similarly,
 we limit the number of words which may appear in the input and target data.
 This vocabulary size only includes the most common 3000 words. In accordance
-with Zipf's law, 3000 words accounts slightly under 80\% of the total
+with Zipf's law, 3000 words accounts for slightly under 80\% of the total
 vocabulary. While this might reduce the quality of the output due to certain
 parts of the output sentences being omitted, it is crucial that the size of
 the input vectors is minimized.
 
-token mappers
-provides system to create token mappers
+\paragraph{}
+The preprocessing system also provides a way of encoding utterances as
+vectors, a process known as word embedding. This is done by simply
+encoding each token as an unique number, with additional logic for handling
+unknown tokens. Note that this is a very simple embedding tecnnique, and
+therefore future work might include exploring alternative embedding techniques
+such as \emph{word2vec} or \emph{BERT}.
 
 \subsection{Model}
 
 This project utilises a fairly standard sequence-to-sequence model implemented
-using Keras. 
+using Keras.
 
 TODO: Describe number of layers, draw a diagram. Explain that we use LSTM nodes.
 Object oriented system. Model is stored, can be loaded. token mappers are also
