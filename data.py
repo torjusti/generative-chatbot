@@ -259,5 +259,3 @@ def analyze_facebook_corpus():
 
     print('Percentage of utterances over MAX_NUM_TOKENS',
           sum(1 for utterance in mapped_utterances if len(utterance) > MAX_NUM_TOKENS) / len(mapped_utterances))
-
-analyze_facebook_corpus()
