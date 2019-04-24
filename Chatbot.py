@@ -1,5 +1,10 @@
-from keras.models import Model
-from keras.layers import Dense, LSTM, CuDNNLSTM, Input, Embedding, TimeDistributed, Flatten, Dropout
+import tensorflow as tf
+from tensorflow.python.keras import backend as K
+#import keras
+#from keras import backend as K
+#import tensorflow.python.keras as keras
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Multiply, Add, Dense, LSTM, GRU, CuDNNLSTM, Input, Embedding, TimeDistributed, Flatten, Dropout, Lambda, Concatenate
 from collections import defaultdict
 import numpy as np
 import os
@@ -15,6 +20,34 @@ NUM_EPOCHS = 200
 DROPOUT_RATE = 0.2
 
 MODEL_PATH = 'models/model.h5'
+
+
+class BahdanauAttention(tf.keras.Model):
+  def __init__(self, units):
+    super(BahdanauAttention, self).__init__()
+    self.W1 = tf.keras.layers.Dense(units)
+    self.W2 = tf.keras.layers.Dense(units)
+    self.V = tf.keras.layers.Dense(1)
+
+  def call(self, query, values):
+    # hidden shape == (batch_size, hidden size)
+    # hidden_with_time_axis shape == (batch_size, 1, hidden size)
+    # we are doing this to perform addition to calculate the score
+    hidden_with_time_axis = tf.expand_dims(query, 1)
+
+    # score shape == (batch_size, max_length, hidden_size)
+    score = self.V(tf.nn.tanh(
+        self.W1(values) + self.W2(hidden_with_time_axis)))
+
+    # attention_weights shape == (batch_size, max_length, 1)
+    # we get 1 at the last axis because we are applying score to self.V
+    attention_weights = tf.nn.softmax(score, axis=1)
+
+    # context_vector shape after sum == (batch_size, hidden_size)
+    context_vector = attention_weights * values
+    context_vector = tf.reduce_sum(context_vector, axis=1)
+
+    return context_vector, attention_weights
 
 
 class Chatbot():
@@ -83,26 +116,36 @@ class Chatbot():
         ''' Construct the model used to train the chatbot. '''
         encoder_inputs = Input(shape=(None, self.num_encoder_tokens), name='encoder_input')
         encoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='encoder_dropout')))(encoder_inputs)
-        encoder = CuDNNLSTM(LATENT_DIM, return_state=True, name='encoder_lstm')
+        encoder = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='encoder_lstm')
 
-        encoder_outputs, state_h, state_c = encoder(encoder_dropout)
-        encoder_states = [state_h, state_c]
+        encoder_outputs, encoder_state = encoder(encoder_dropout)
+        #encoder_states = [state_h, state_c]
+
+        # Attention mechanism
+        attention_layer = BahdanauAttention(LATENT_DIM, name='attention_layer')
+        attention_result, attention_weights = attention_layer(encoder_state, encoder_outputs)
 
         decoder_inputs = Input(shape=(None, self.num_decoder_tokens), name='decoder_input')
         decoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='decoder_dropout')))(decoder_inputs)
-        decoder_lstm = CuDNNLSTM(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_lstm')
-        decoder_outputs, _, _ = decoder_lstm(decoder_dropout, initial_state=encoder_states)
+
+        decoder_lstm = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_lstm')
+        decoder_outputs, _ = decoder_lstm(decoder_dropout, initial_state=encoder_state)
+
+        print(decoder_outputs)
+        decoder_outputs = Concatenate(axis=-1, name='concat_layer')([decoder_outputs, attention_weights])
+        print(decoder_outputs)
+
         decoder_dense = Dense(self.num_decoder_tokens, activation='softmax', name='decoder_activation_softmax')
-        decoder_outputs = decoder_dense(decoder_outputs)
+        dense_time = TimeDistributed(decoder_dense, name='time_distributed_layer')
+        decoder_outputs = dense_time(decoder_outputs)
 
-        self.model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
-
+        self.model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=[decoder_outputs])
         self.model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 
-        self.encoder_model = Model(encoder_inputs, encoder_states)
+        self.encoder_model = Model(inputs=encoder_inputs, outputs=[encoder_outputs, encoder_state])
 
-        decoder_states_inputs = [Input(shape=(LATENT_DIM,)), Input(shape=(LATENT_DIM,))]
-        decoder_outputs, state_h, state_c = decoder_lstm(decoder_inputs, initial_state=decoder_states_inputs)
+        decoder_states_inputs = [Input(shape=(LATENT_DIM,))]
+        decoder_outputs, decoder_inf_state = decoder_lstm(decoder_inputs, initial_state=decoder_states_inputs)
         decoder_outputs = decoder_dense(decoder_outputs)
 
         self.decoder_model = Model([decoder_inputs] + decoder_states_inputs, [decoder_outputs] + [state_h, state_c])
