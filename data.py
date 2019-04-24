@@ -16,7 +16,7 @@ MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 250000)
 MAX_VOCABULARY_SIZE = os.getenv('MAX_VOCABULARY_SIZE', 3000)
 
 # If specifified, only tweets from this user name will be used as replies.
-TARGET_USER = os.getenv('TARGET_USER', 'Torjus Tønnessen Iveland')
+TARGET_USER = os.getenv('TARGET_USER', None)
 
 # If set, we filter away self-responses.
 REMOVE_SELF_REPLIES = os.getenv('REMOVE_SELF_REPLIES', True)
