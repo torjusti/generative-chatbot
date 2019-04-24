@@ -29,7 +29,7 @@
 
 \addbibresource{references.bib}
 
-\title{\textbf{Language Agnostic Generative Chatbot using Personal Chatlog
+\title{\textbf{Language Agnostic Generative Chatbot using Personal Chat log
 Data}}
 \author{Torjus Iveland \and Vegar Andreas Bergum}
 \date{}
@@ -37,7 +37,7 @@ Data}}
 \begin{document}
 
 \maketitle
-\centerline{\textit{TDT4310 - Intelligent Text Analystics and Language
+\centerline{\textit{TDT4310 - Intelligent Text Analytics and Language
 Understanding}}
 \centerline{\textit{Norwegian University of Science and Technology}}
 \centerline{\textit{Trondheim, Norway --- April 2019}}
@@ -45,7 +45,7 @@ Understanding}}
 
 \begin{abstract}
 
-In this report, we explore the state of Norwegian chatbot systems with
+This report explores the state of Norwegian chatbot systems with
 the aim of verifying that conventional English chatbot creation techniques
 also can be used to create chatbots which converse in Norwegian. There are
 multiple challenges with Norwegian chatbots, due to the syntactic structure
@@ -65,11 +65,11 @@ data in Norwegian can be hard to obtain.
 
 \section*{Introduction}
 A chatbot is a computer system which can interact with an user through natural
-languge. Because humans tend to prefer more human-like interfaces, chatbots can
+language. Because humans tend to prefer more human-like interfaces, chatbots can
 be very useful in applications
 such as customer support, education, and personal productivity systems like
 Google Assistant.  This project concerns such chatbots which converse
-specifically using the Norwwegian language.
+specifically using the Norwegian language.
 
 \paragraph{}
 Most research on chatbot systems concerns chatbots which converse in English.
@@ -85,10 +85,10 @@ conventional chatbot-creation techniques also can function adequately in
 Norwegian. We especially want to verify that deep learning techniques such as
 sequence-to-sequence models \cite{Cho2014} can be used to create
 general-purpose Norwegian chatbots. Such models are usually used for machine
-translation, but they have also proven efective in the field of chatbots. The
+translation, but they have also proven effective in the field of chatbots. The
 main objective of this project is therefore to implement a simple Norwegian
 chatbot using a sequence-to-sequence model, which for example could be used as
-a smalltalk module in another mode domain-specific chatbot.
+a small talk module in another mode domain-specific chatbot.
 
 \paragraph{}
 We differ between retrieval-based and generative chatbots. A retrieval-based
@@ -197,7 +197,7 @@ First, text is normalized by removing all punctuation from the text. Newlines
 are replaced with spaces, and all text is converted to lower-case. Ideally,
 the bot should output grammatically correct text, but this requires a
 significantly more complex model. We use the Norwegian NLTK tokenizer to split
-the text into words. Lastly, each utterance is wrappde in a special stard and
+the text into words. Lastly, each utterance is wrapped in a special start and
 end token, which indicates to the model when it should stop generating text
 during the inference phase.
 \todo{Might not want to use the word inference phase, not defined.}
@@ -206,7 +206,7 @@ during the inference phase.
 The preprocessing system also performs filtering on which utterances should
 and should not be used. For example, the system can be configured to only
 use responses from a specific person, to give the chatbot a more distinct
-persionality. Additionally, the system can removes self-replies, so that
+personality. Additionally, the system can removes self-replies, so that
 only discourse between two different persons is considered.
 
 \paragraph{}
@@ -225,7 +225,7 @@ the input vectors is minimized.
 The preprocessing system also provides a way of encoding utterances as
 vectors, a process known as word embedding. This is done by simply
 encoding each token as an unique number, with additional logic for handling
-unknown tokens. Note that this is a very simple embedding tecnnique, and
+unknown tokens. Note that this is a very simple embedding technique, and
 therefore future work might include exploring alternative embedding techniques
 such as \emph{Word2Vec} \cite{word2vec} or \emph{BERT} \cite{bert2018}.
 We now provide a high-level conceptual overview of the feature extraction
@@ -257,7 +257,7 @@ of sequence, padding and end of sequence.
 \end{table}
 
 \paragraph{}
-In order to maintain a fixed dimentionality of our sequence embeddings there
+In order to maintain a fixed dimensionality of our sequence embeddings there
 needs to be predefined sequence length. In this example this is set to 5. If a
 sequence is shorter than this, the rest of the sequence matrix is filled in
 padding tokens. Using the vocabulary above, the word ``how'' is mapped to the
@@ -297,7 +297,7 @@ that its length is 5, excluding the beginning- and end of sequence tokens.
 This sequence embedding is used to extract the necessary features needed to
 make a statistical prediction of the next token in an output sequence, given an
 input sequence. The extracted features and be considered as the context of the
-token's occurences.
+token's occurrences.
 
 
 \subsection*{Model}
