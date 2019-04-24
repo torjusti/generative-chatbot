@@ -170,7 +170,7 @@ class Chatbot():
             if word == END_UTTERANCE or len(output) >= self.max_decoder_seq_length:
                 break
 
-            if word != START_UTTERANCE and word != END_UTTERANCE:
+            if word != START_UTTERANCE and word != END_UTTERANCE and word != PAD_TOKEN:
                 output.append(word)
 
             target_sequence = np.zeros((1, 1, self.num_decoder_tokens))
