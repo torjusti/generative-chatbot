@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{biblatex}
 \usepackage{todonotes}
+\usepackage{amsmath}
 
 % TODO: Tren og evaluer standard 300, kompleks 300, attention bot
 % skriv rapport
@@ -200,13 +201,82 @@ vocabulary. While this might reduce the quality of the output due to certain
 parts of the output sentences being omitted, it is crucial that the size of
 the input vectors is minimized.
 
-\paragraph{}
+\subsection{Feature extraction}
+
 The preprocessing system also provides a way of encoding utterances as
 vectors, a process known as word embedding. This is done by simply
 encoding each token as an unique number, with additional logic for handling
 unknown tokens. Note that this is a very simple embedding tecnnique, and
 therefore future work might include exploring alternative embedding techniques
-such as \emph{word2vec} or \emph{BERT}.
+such as \emph{Word2Vec} \cite{word2vec} or \emph{BERT} \cite{bert2018}.
+
+\begin{equation} \label{eq:vocab}
+  \vec{V} = [<BOS>, <PAD>, "how", "are", "you", "doing", <EOS>]
+\end{equation}
+
+\paragraph{}
+With a corpus containing the utterances $D$, 
+$D = \{\text{"How are you doing?"}\}$, a vocabulary vector $\vec{V}$ (equation
+\ref{eq:vocab}) is
+constructed where the index of the token is its numerical value. This mapping
+is shown in table \ref{tab:tok2num}. Note that there are three special tokens
+representing beginning of sequence, padding and end of sequence.
+
+\begin{table}[hbt]
+  \begin{center}
+    \begin{tabular}{c|c|c|c|c|c|c|c}
+      \textbf{idx} & 0 & 1 & 2 & 3 & 4 & 5 & 6\\
+      \hline
+      \textbf{token} & $<$PAD$>$ & $<$BOS$>$ & how & are & you & doing & $<$EOS$>$\\
+    \end{tabular}
+  \end{center}
+  \label{tab:tok2num}
+  \caption{Token to number map}
+\end{table}
+
+\paragraph{}
+In order to maintain a fixed dimentionality of our sequence embeddings there
+needs to be predefined sequence length. In this example this is set to 5. If a
+sequence is shorter than this, the rest of the sequence matrix is filled in
+padding tokens. Using the vocabulary above, the word "how" recieves the word
+vector $\vec{v}_2$.
+
+\begin{equation}
+  \vec{v}_2 = [0, 0, 1, 0, 0, 0, 0] \quad {\leftrightarrow} \quad  "how"
+\end{equation}
+
+\paragraph{}
+Using these word vectors, a sequence matrix can be constructed by a vector of
+row vectors. The sequence matrix $d_0$ is sequence embedding of utterance in
+the initial dataset $D$.
+
+\begin{equation}
+  d_{0} = 
+    \begin{bmatrix}
+      0 & 1 & 0 & 0 & 0 & 0 & 0\\
+      0 & 0 & 1 & 0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 1 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0 & 1 & 0 & 0\\
+      0 & 0 & 0 & 0 & 0 & 1 & 0\\
+      1 & 0 & 0 & 0 & 0 & 0 & 0\\
+      0 & 0 & 0 & 0 & 0 & 0 & 1\\
+    \end{bmatrix}
+\end{equation}
+
+\paragraph{}
+Equation \ref{eq:seq-out} show the exact sequence represented by $d_0$. Notice
+that its length is 5, excluding the beginning- and end of sequence tokens.
+
+\begin{equation} \label{eq:seq-out}
+[<BOS>, "How", "are", "you", "doing", <PAD>, <EOS>]
+\end{equation}
+
+\paragraph{}
+This sequence embedding is used to extract the necessary features needed to
+make a statistical prediction of the next token in an output sequence, given an
+input sequence. The extracted features and be considered as the context of the
+token's occurences.
+
 
 \subsection{Model}
 
