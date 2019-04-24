@@ -3,6 +3,10 @@
 \usepackage{biblatex}
 \usepackage{todonotes}
 
+% TODO: Tren og evaluer standard 300, kompleks 300, attention bot
+% skriv rapport
+% Kok fra den andre rapportgreia
+
 \addbibresource{references.bib}
 
 \title{Language Agnostic Generative Chatbot using Personal Chatlog Data}
@@ -15,14 +19,22 @@
 
 \begin{abstract}
 
-In this report, we describe the implementation of a simple chtbot system
-using sequence-to-sequence model. we find that
+In this report, we explore the state of Norwegian chatbot systems with
+the aim of verifying that conventional English chatbot creation techniques
+also can be used to create chatbots which converse in Norwegian. There are
+multiple challenges with Norwegian chatbots, due to the syntactic structure
+of the language as well as the lack of available training data.
 
-\if
-- What we researched.
-- How we did it.
-- What we found out.
-\fi
+\paragraph{}
+We present an implementation of a generic-domain chatbot system using a simple
+sequence-to-sequence model, a kind of model which primarily is applied to
+neural machine translation but which also has proven effective for chatbot
+systems. We believe our results illustrate that neural machine translation
+techniques indeed can be applied to create chatbots in both Norwegian as
+well as English, as long as enough training data of a sufficiently high
+quality is available. However, we stress that in many cases such training
+data in Norwegian can be hard to obtain.
+
 \end{abstract}
 
 \section{Introduction}
@@ -84,8 +96,6 @@ responds with an answer to each user query.
 % teorikapitlet, bare skal skrive om det metodiske som er relevant for din
 % studie.
 
-
-
 \if
  - Prøvd ut pre-existing modeller med forskjellige datasett
     - engelsk datasett som vi vet er av god kvalitet
@@ -93,8 +103,6 @@ responds with an answer to each user query.
  - Sammenlignet egne modeller og eget datasett mot dette
  - Ressursbegrensning (datakraft og tid) har begrenset omfanget på evaluering
  av forskjellige modeller
- - 
-
 \fi
 
 \section{Data}
@@ -128,9 +136,102 @@ chatbot models as a high quality data set.
 - Difficulties with chatbot data 
 - We use chatbot data, want to check if it is possible to use real chatlot data
 to create a language-agnostic bot 
+- English dataset usage
 \fi
 
 \section{Implementation}
+
+Chatbots which utilise deep learning are usually based on sequence to sequence
+models. A sequence to sequence model is a type of architecture where there is
+an encoder RNN and a decoder RNN. For usages such as machine translation and
+chatbots, the idea is that we feed the encoder RNN input words one at a time,
+which eventually results in an output vector describing the input sentence.
+This output vector is sometimes referred to as a thought vector, as it stores
+the systems understanding of the input. For machine translation, we would feed
+the encoder RNN the sentence to be translated, and for chatbots, the encoder
+RNN would accept the input sentence which should be responded to. The decoder
+RNN is trained to take thought vectors from the encoder and output tokens
+one by one until an end of sequence token is outputted. Since the decoder
+network is dependent on the output of the encoder network, both networks are
+trained together. This simple model has proven very effective for neural
+machine translation and other tasks as well. An early description of this
+architecture is available in \cite{Cho2014}.
+
+\subsection{Preprocessing}
+
+Before the data is forwarded to the model, it needs to be preprocessed. The
+preprocessing phase in this project consists of a number of steps. We use
+data from Facebook Messenger to train our chatbot. To split the data into
+input and target data sets, we simply treat each utterance as the input to
+the next utterance - that is, each utterance is the response to the previous.
+
+\paragraph{}
+First, text is normalized by removing all punctuation from the text. Newlines
+are replaced with spaces, and all text is converted to lower-case. Ideally,
+the bot should output grammatically correct text, but this requires a
+significantly more complex model. We use the Norwegian NLTK tokenizer to split
+the text into words. Lastly, each utterance is wrappde in a special stard and
+end token, which indicates to the model when it should stop generating text
+during the inference phase.
+\todo{Might not want to use the word inference phase, not defined.}
+
+\paragraph{}
+The preprocessing system also performs filtering on which utterances should
+and should not be used. For example, the system can be configured to only
+use responses from a specific person, to give the chatbot a more distinct
+persionality. Additionally, the system can removes self-replies, so that
+only discourse between two different persons is considered.
+
+\paragraph{}
+The maximum length of an input or target utterance is capped at 20 tokens.
+This is required to reduce the size of the input matrices for the model, due
+to limited available computational power. However, an analysis of the dataset
+shows that only about 4\% of the utterances are above this limit. Similarly,
+we limit the number of words which may appear in the input and target data.
+This vocabulary size only includes the most common 3000 words. In accordance
+with Zipf's law, 3000 words accounts slightly under 80\% of the total
+vocabulary. While this might reduce the quality of the output due to certain
+parts of the output sentences being omitted, it is crucial that the size of
+the input vectors is minimized.
+
+token mappers
+provides system to create token mappers
+
+\subsection{Model}
+
+This project utilises a fairly standard sequence-to-sequence model implemented
+using Keras. 
+
+TODO: Describe number of layers, draw a diagram. Explain that we use LSTM nodes.
+Object oriented system. Model is stored, can be loaded. token mappers are also
+stored. how we fit the model. epochs, batches. model printout.
+
+\subsection{Inference}
+
+\subsection{}
+
+want to take input (x1, x2, ...) and map to ouput (y1, y2, ...). could work for nmt. first, lets have encoder rnn (lstm or gru),
+feed it french words 1 at a time. then we get output vector representing input sentence. then we build a decoder network,
+takes encoding output from encoder network and then is trained to output the translation word by word until it spits out an end of sequence token
+ ite. this works pretty well for nmt and other applications. 
+
+
+
+one hot
+
+model type
+
+preprocessing specifics
+
+- vocabulary
+
+mode specifics
+
+inference shit
+
+
+appendix: conversation data
+
 
 \if
 - seq2seq 
@@ -168,7 +269,6 @@ answer from a list of answers belonging to the intent. Such systems require a
 fair amount of manual training, and lack the ability to independently formulate
 an answer independently, based only on the question.  In this report, we
 describe a generative chatbot which is based on an unsupervised model.
-
 
 \section{Results}
 

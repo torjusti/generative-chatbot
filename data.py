@@ -13,10 +13,10 @@ MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 250000)
 
 # The maximum number of words which are considered. This value
 # is the number of most common words which get included in embedding.
-MAX_VOCABULARY_SIZE = os.getenv('MAX_VOCABULARY_SIZE', 1000)
+MAX_VOCABULARY_SIZE = os.getenv('MAX_VOCABULARY_SIZE', 3000)
 
 # If specifified, only tweets from this user name will be used as replies.
-TARGET_USER = os.getenv('TARGET_USER', None)
+TARGET_USER = os.getenv('TARGET_USER', 'Torjus Tønnessen Iveland')
 
 # If set, we filter away self-responses.
 REMOVE_SELF_REPLIES = os.getenv('REMOVE_SELF_REPLIES', True)
@@ -232,3 +232,32 @@ class TokenMapper():
             self.tok2num[token] = len(self.num2tok)
             self.num2tok[len(self.num2tok)] = token
 
+
+def analyze_facebook_corpus():
+    ''' todo '''
+    # Load input and target utterances.
+    input_utterances, target_utterances = get_utterance_pairs()
+
+    # Merge first input utterance with time-shifted target
+    # utterances, to get a list with all utterances.
+    merged_utterances = [input_utterances[0]] + target_utterances
+
+    token_mapper = TokenMapper(merged_utterances)
+
+    # Vectorize utterances.
+    mapped_utterances = [
+        [token_mapper.tok2num[token] for token in utterance]
+        for utterance in merged_utterances
+    ]
+
+    # Count occurrences of each token in dataset.
+    token_counts = collections.Counter(token for tokens in mapped_utterances for token in tokens)
+
+    print('Percentage of unknown tokens', token_counts[token_mapper.tok2num[UNKNOWN_TOKEN]] / sum(token_counts.values()))
+
+    print('Average length of utterance', sum(len(utterance) for utterance in mapped_utterances) / len(mapped_utterances))
+
+    print('Percentage of utterances over MAX_NUM_TOKENS',
+          sum(1 for utterance in mapped_utterances if len(utterance) > MAX_NUM_TOKENS) / len(mapped_utterances))
+
+analyze_facebook_corpus()
