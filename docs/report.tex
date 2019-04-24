@@ -106,6 +106,7 @@ responds with an answer to each user query.
 - Attention \cite{Bahdanau2015}, BERT and similar when we hopefully begin using it.
 \fi
 
+
 \section*{Method}
 % I dette kapitlet skal du skrive om hvordan du har gått frem metodisk, og vise
 % hvordan valg av design og metode egner seg til å svare på problemstillingen
@@ -119,7 +120,6 @@ responds with an answer to each user query.
 % og kritisk overfor arbeidet du har gjort.  Husk også at du her, slik som i
 % teorikapitlet, bare skal skrive om det metodiske som er relevant for din
 % studie.
-
 \if
  - Prøvd ut pre-existing modeller med forskjellige datasett
     - engelsk datasett som vi vet er av god kvalitet
@@ -128,6 +128,33 @@ responds with an answer to each user query.
  - Ressursbegrensning (datakraft og tid) har begrenset omfanget på evaluering
  av forskjellige modeller
 \fi
+
+This project's main goal was to explore the possibility of generative chatbots
+in Norwegian. One of the prerequisites for a language specific language
+generation system to work is data. The language generation method is highly
+dependant on the amount and quality of data available. The method of choice was
+is the sequence-to-sequence model proposed by Cho et al. (2014)'s
+\textit{Learning Phrase Representation using RNN Encoder-Decoder for
+  Statistical Machine Translation} \cite{Cho2014}
+
+\paragraph{}
+Sequence-to-sequence models have proven to be providing an excellent baseline
+When considering a user-initiative only model the task of a generative chatbot
+system can be reduced to mapping introductory utterances to a responsive target
+utterance.  Models with a sufficiently large corpus for example based
+`translation' had been shown to produce promising results in the given corpus
+language \cite{Ezquerra2018}. Although these bots are not able apply any logic
+to their answers, they are able to mimic natural human language.
+
+\paragraph{}
+The architecture is built using Google's Machine Learning framework TensorFlow
+as a backend with Keras as a high level wrapper. The architecture looks at a
+model using Long Short Term Memory (LSTM) nodes with word-level context and a
+three-dimensional sequence embedding. This architecture can be further
+developed using a word-level embedding such as \textit{Word2Vec}
+\cite{word2vec} and sequence-level context like the Bahdanau Attention mechanism
+\cite{Bahdanau2015}.
+
 
 \section*{Data}
 Norwegian chatbot training data is not readily available, but relevant corpora
