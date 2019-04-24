@@ -210,24 +210,29 @@ unknown tokens. Note that this is a very simple embedding tecnnique, and
 therefore future work might include exploring alternative embedding techniques
 such as \emph{Word2Vec} \cite{word2vec} or \emph{BERT} \cite{bert2018}.
 
-\begin{equation} \label{eq:vocab}
-  \vec{V} = [<BOS>, <PAD>, "how", "are", "you", "doing", <EOS>]
-\end{equation}
+\paragraph{}
+We now provide a high-level conceptual overview of the feature extraction
+process used in this project.
 
 \paragraph{}
-With a corpus containing the utterances $D$, 
-$D = \{\text{"How are you doing?"}\}$, a vocabulary vector $\vec{V}$ (equation
-\ref{eq:vocab}) is
-constructed where the index of the token is its numerical value. This mapping
-is shown in table \ref{tab:tok2num}. Note that there are three special tokens
-representing beginning of sequence, padding and end of sequence.
+With a corpus $D = \{\text{``How are you doing?''}\}$ containing utterances, 
+a vocabulary $\vec{V}$ containing all distinct words in the corpus is
+constructed. This is used to build a mapping where each token is mapped to
+its corresponding index in the vocabulary vector $\vec{V}$. This mapping is
+then used to encode utterances as vectors. Table \ref{tab:tok2num} illustrates
+this mapping. Note that there are three special tokens representing beginning
+of sequence, padding and end of sequence.
+
+\begin{equation}
+   \vec{V} = [<BOS>, <PAD>, ``how'', ``are'', ``you'', ``doing'', <EOS>]
+ \end{equation}
 
 \begin{table}[hbt]
   \begin{center}
     \begin{tabular}{c|c|c|c|c|c|c|c}
-      \textbf{idx} & 0 & 1 & 2 & 3 & 4 & 5 & 6\\
+      \textbf{Index} & 0 & 1 & 2 & 3 & 4 & 5 & 6\\
       \hline
-      \textbf{token} & $<$PAD$>$ & $<$BOS$>$ & how & are & you & doing & $<$EOS$>$\\
+      \textbf{Token} & $<$PAD$>$ & $<$BOS$>$ & how & are & you & doing & $<$EOS$>$\\
     \end{tabular}
   \end{center}
   \label{tab:tok2num}
@@ -238,11 +243,11 @@ representing beginning of sequence, padding and end of sequence.
 In order to maintain a fixed dimentionality of our sequence embeddings there
 needs to be predefined sequence length. In this example this is set to 5. If a
 sequence is shorter than this, the rest of the sequence matrix is filled in
-padding tokens. Using the vocabulary above, the word "how" recieves the word
-vector $\vec{v}_2$.
+padding tokens. Using the vocabulary above, the word ``how'' is mapped to the
+word vector $\vec{v}_2$.
 
 \begin{equation}
-  \vec{v}_2 = [0, 0, 1, 0, 0, 0, 0] \quad {\leftrightarrow} \quad  "how"
+  \vec{v}_2 = [0, 0, 1, 0, 0, 0, 0] \quad {\leftrightarrow} \quad \textrm{``how''}
 \end{equation}
 
 \paragraph{}
@@ -268,7 +273,7 @@ Equation \ref{eq:seq-out} show the exact sequence represented by $d_0$. Notice
 that its length is 5, excluding the beginning- and end of sequence tokens.
 
 \begin{equation} \label{eq:seq-out}
-[<BOS>, "How", "are", "you", "doing", <PAD>, <EOS>]
+[<BOS>, ``How'', ``are'', ``you'', ``doing'', <PAD>, <EOS>]
 \end{equation}
 
 \paragraph{}
