@@ -5,6 +5,7 @@
 \usepackage{todonotes}
 \usepackage{amsmath}
 \usepackage{titlesec}
+\usepackage[T1]{fontenc}
 
 % TODO: Tren og evaluer standard 300, kompleks 300, attention bot
 % skriv rapport
@@ -20,13 +21,15 @@
   \begin{center}
   \bfseries \abstractname\vspace{0em}
   \end{center}
-  \list{}{%
+  \list{}{
     \setlength{\leftmargin}{12.5mm}%
     \setlength{\rightmargin}{\leftmargin}%
-  }%
+  }
   \item\relax}
  {\endlist}
 
+ \renewcommand{\arraystretch}{1.2}
+ 
 \addbibresource{references.bib}
 
 \title{\textbf{Language Agnostic Generative Chatbot using Personal Chat log
@@ -133,18 +136,17 @@ This project's main goal was to explore the possibility of generative chatbots
 in Norwegian. One of the prerequisites for a language specific language
 generation system to work is data. The language generation method is highly
 dependant on the amount and quality of data available. The method of choice was
-is the sequence-to-sequence model proposed by Cho et al. (2014)'s
-\textit{Learning Phrase Representation using RNN Encoder-Decoder for
-  Statistical Machine Translation} \cite{Cho2014}
+the sequence-to-sequence model proposed by Cho et al. in their paper \cite{Cho2014}.
 
 \paragraph{}
-Sequence-to-sequence models have proven to be providing an excellent baseline
+Sequence-to-sequence models have proven to be providing an excellent baseline.
 When considering a user-initiative only model the task of a generative chatbot
 system can be reduced to mapping introductory utterances to a responsive target
 utterance.  Models with a sufficiently large corpus for example based
 `translation' had been shown to produce promising results in the given corpus
 language \cite{Ezquerra2018}. Although these bots are not able apply any logic
 to their answers, they are able to mimic natural human language.
+\todo{Fix weird typo.}
 
 \paragraph{}
 The architecture is built using Google's Machine Learning framework TensorFlow
@@ -154,7 +156,8 @@ three-dimensional sequence embedding. This architecture can be further
 developed using a word-level embedding such as \textit{Word2Vec}
 \cite{word2vec} and sequence-level context like the Bahdanau Attention mechanism
 \cite{Bahdanau2015}.
-
+\todo{Rewrite paragraph slightly. Also add more information about why
+we believe this will illustrate the effectiveness of Norwegian chatbots.}
 
 \section*{Data}
 Norwegian chatbot training data is not readily available, but relevant corpora
@@ -177,9 +180,9 @@ course of a few years. More avid users of the platform can have chat logs
 containing several hundred thousands or even millions of messages. This project
 combines the utterances of two Facebook users, ending in a corpus with more
 than 110,000 utterance pairs.
-
 \todo{vil vi ha med noe om challenges mtp at svar kan variere veldig fra person
-til person?}
+til person? svar: ja}
+\todo{want to use norwegian chat data to verify...}
 
 \paragraph{}
 In addition to using personal Facebook Messenger data, the Cornell Movie
@@ -187,13 +190,9 @@ Dialogs Corpus \cite{cornell-corpus} has been used for model evaluation. The
 Cornell corpus consists of several hundreds of thousands utterances from movie
 scripts that are freely available. This corpus is frequently highlighted in
 chatbot models as a high quality data set.
-
-\if
-- Difficulties with chatbot data 
-- We use chatbot data, want to check if it is possible to use real chatlot data
-to create a language-agnostic bot 
-- English dataset usage
-\fi
+\todo{difficulties with chatbot data. want to check if it is possible
+to use real }
+\todo{used this dataset for cross-checking}
 
 \section*{Implementation}
 Chatbots which utilise deep learning are usually based on sequence to sequence
@@ -249,6 +248,7 @@ parts of the output sentences being omitted, it is crucial that the size of
 the input vectors is minimized.
 
 \subsection*{Feature extraction}
+\todo{Is feature extraction the correct term?}
 The preprocessing system also provides a way of encoding utterances as
 vectors, a process known as word embedding. This is done by simply
 encoding each token as an unique number, with additional logic for handling
@@ -266,27 +266,30 @@ its corresponding index in the vocabulary vector $\vec{V}$. This mapping is
 then used to encode utterances as vectors. Table \ref{tab:tok2num} illustrates
 this mapping. Note that there are three special tokens representing beginning
 of sequence, padding and end of sequence.
+\todo{Refer to more equations and fix broken table reference.}
 
 \begin{equation}
-   \vec{V} = [<BOS>, <PAD>, ``how'', ``are'', ``you'', ``doing'', <EOS>]
+   \vec{V} = [ \textrm{<BOS>},\, \textrm{<PAD>},\, \textrm{``how''},\,
+               \textrm{``are''},\, \textrm{``you''},\, \textrm{``doing''},\,
+               \textrm{<EOS>}]
  \end{equation}
 
 \begin{table}[hbt]
   \begin{center}
     \begin{tabular}{c|c|c|c|c|c|c|c}
-      \textbf{Index} & 0 & 1 & 2 & 3 & 4 & 5 & 6\\
+      \textbf{Index} & 0 & 1 & 2 & 3 & 4 & 5 & 6 \\
       \hline
-      \textbf{Token} & $<$PAD$>$ & $<$BOS$>$ & how & are & you & doing & $<$EOS$>$\\
+      \textbf{Token} & <PAD> & <BOS> & how & are & you & doing & <EOS> \\
     \end{tabular}
   \end{center}
   \label{tab:tok2num}
-  \caption{Token to number map}
+  \caption{Token to number mapping}
 \end{table}
 
 \paragraph{}
 In order to maintain a fixed dimensionality of our sequence embeddings there
 needs to be predefined sequence length. In this example this is set to 5. If a
-sequence is shorter than this, the rest of the sequence matrix is filled in
+sequence is shorter than this, the rest of the sequence matrix is filled with
 padding tokens. Using the vocabulary above, the word ``how'' is mapped to the
 word vector $\vec{v}_2$.
 
@@ -298,6 +301,8 @@ word vector $\vec{v}_2$.
 Using these word vectors, a sequence matrix can be constructed by a vector of
 row vectors. The sequence matrix $d_0$ is sequence embedding of utterance in
 the initial dataset $D$.
+\todo{I haven't heard the term sequence matrix before. This is just an
+one-hot encoding of the tokens in the sequence.}
 
 \begin{equation}
   d_{0} = 
@@ -317,7 +322,8 @@ Equation \ref{eq:seq-out} show the exact sequence represented by $d_0$. Notice
 that its length is 5, excluding the beginning- and end of sequence tokens.
 
 \begin{equation} \label{eq:seq-out}
-[<BOS>, ``How'', ``are'', ``you'', ``doing'', <PAD>, <EOS>]
+  [ \textrm{<BOS>},\, \textrm{``How''},\, \textrm{``are''},\, \textrm{``you''},\,
+    \textrm{``doing''},\, \textrm{<PAD>},\, \textrm{<EOS>} ]
 \end{equation}
 
 \paragraph{}
@@ -325,47 +331,58 @@ This sequence embedding is used to extract the necessary features needed to
 make a statistical prediction of the next token in an output sequence, given an
 input sequence. The extracted features and be considered as the context of the
 token's occurrences.
-
+\todo{I don't understand this paragraph.}
 
 \subsection*{Model}
 This project utilises a fairly standard sequence-to-sequence model implemented
-using Keras.
+using Keras, which is illustrated in figure \ref{fig:keras-model}. The encoder
+conists of an input layer, another layer with dropout and an LSTM layer which
+feeds into the decoder. The decoder is strictured similarly, consisting of an
+input layer, a dropout layer, a decoder dropout layer and a dense layer as the
+last layer of the model.
 
-TODO: Describe number of layers, draw a diagram. Explain that we use LSTM nodes.
-Object oriented system. Model is stored, can be loaded. token mappers are also
-stored. how we fit the model. epochs, batches. model printout.
+\begin{center}
+  \begin{figure}[hbt]
+    \centering
+    \makebox[\linewidth][c]
+      {
+        \includegraphics[width=0.9\textwidth]
+        {model.png}
+      }
+    \caption{The Keras model behind the chatbot.}
+    \label{fig:keras-model}
+  \end{figure}
+\end{center}
+
+In this model, the encoder LSTM is fed one-hot encoded utterances one at a
+time. Recall that the purpose of this step is to create a compact, internal
+representation of the input utterance - a thought vector, so to speak. The
+enoder LSTM outpts a list containing outputs from the encoder as well as the
+internal encoder state. The decoder LSTM discards the LSTM output, but uses
+the final hidden encoder state as its own initial state, so that the decoder
+also has information about the input utterance. As input, the decoder layer
+is fed the target sequence - that is, the response utterance. As a target for
+output, the decoder is fed the same target sequence, but shifted to the right
+by one. This is a training method which is known as teacher forcing. It simply
+means that the network is taught to output token $n$ in the utterance, given
+token $n-1$ as input.
+\todo{Alteratives to teacher forcing.}
+\todo{I don't really understand this stuff thoroughly. Triple check solidness, elaborate more.}
+\todo{Object oriented system. Explain LSTM nodes. Object oriented system. How we fit the model. Epochs, batches.}
 
 \subsection*{Inference}
 
+
+%# Next: inference mode (sampling).
+%# Here's the drill:
+%# 1) encode input and retrieve initial decoder state
+%# 2) run one step of decoder with this initial state
+%# and a "start of sequence" token as target.
+%# Output will be the next target token
+%# 3) Repeat with the current target token and current states
+
+
 \subsection*{}
-want to take input (x1, x2, ...) and map to ouput (y1, y2, ...). could work for nmt. first, lets have encoder rnn (lstm or gru),
-feed it french words 1 at a time. then we get output vector representing input sentence. then we build a decoder network,
-takes encoding output from encoder network and then is trained to output the translation word by word until it spits out an end of sequence token
- ite. this works pretty well for nmt and other applications. 
-
-
-
-one hot
-
-model type
-
-preprocessing specifics
-
-- vocabulary
-
-mode specifics
-
-inference shit
-
-
-appendix: conversation data
-
-
-\if
-- seq2seq 
-- preprocessing of norwegian data - describe stack 
-- teacher forcing
-\fi
 
 % Architecture \ Experimental Setup + Teacher forcing Future work: Bert/custom
 % embeddings, embedding layer, bidirectional model, beam search
@@ -416,6 +433,8 @@ describe a generative chatbot which is based on an unsupervised model.
 % prosjekt. Hvilke bidrag har din undersøke gitt til faget? Er det noe som
 % burde blitt studert ytterligere? Slik tar du utgangspunkt i ditt eget
 % prosjekt og peker på mulighet for oppfølging.
+
+\todo{Conversation data in appendix.}
 
 \printbibliography
 
