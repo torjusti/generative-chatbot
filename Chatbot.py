@@ -6,6 +6,7 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import Multiply, Add, Dense, LSTM, GRU, CuDNNLSTM, Input, Embedding, TimeDistributed, Flatten, Dropout, Lambda, Concatenate
 from collections import defaultdict
+from attention_keras.layers.attention import AttentionLayer
 import numpy as np
 import os
 
@@ -20,37 +21,6 @@ NUM_EPOCHS = 200
 DROPOUT_RATE = 0.2
 
 MODEL_PATH = 'models/model.h5'
-
-
-class BahdanauAttention(Model):
-  def __init__(self, units, name=None):
-    super(BahdanauAttention, self).__init__(name=name)
-    self.W1 = Dense(units)
-    self.W2 = Dense(units)
-    self.V = Dense(1)
-
-  def __call__(self, query, values):
-    # hidden shape == (batch_size, hidden size)
-    # hidden_with_time_axis shape == (batch_size, 1, hiddembeden size)
-    # we are doing this to perform addition to calculate the score
-    #hidden_with_time_axis = K.expand_dims(query, 1)
-    ones_tensor = Lambda(lambda x: K.ones_like(x))(query)
-    ones_tensor = ones_tensor[:, 0]
-    hidden_with_time_axis = Lambda(lambda x: K.expand_dims(x, axis=1))(ones_tensor)
-
-    # score shape == (batch_size, max_length, hidden_size)
-    score = self.V(Dense(1, activation='tanh')(Add()([self.W1(values), self.W2(hidden_with_time_axis)])))
-    #score = self.V(K.tanh(self.W1(values) + self.W2(hidden_with_time_axis)))
-
-    # attention_weights shape == (batch_size, max_length, 1)
-    # we get 1 at the last axis because we are applying score to self.V
-    attention_weights = Dense(units=1, activation='softmax')(score)
-
-    # context_vector shape after sum == (batch_size, hidden_size)
-    context_vector = Multiply()([attention_weights, values])
-    context_vector = Lambda(lambda x: K.sum(x, axis=1))(context_vector)
-
-    return context_vector, attention_weights
 
 
 class Chatbot():
@@ -117,41 +87,43 @@ class Chatbot():
 
     def __build_model(self):
         ''' Construct the model used to train the chatbot. '''
-        encoder_inputs = Input(shape=(None, self.num_encoder_tokens), name='encoder_input')
+        encoder_inputs = Input(shape=(self.max_encoder_seq_length, self.num_encoder_tokens), name='encoder_input')
         encoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='encoder_dropout')))(encoder_inputs)
         encoder = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='encoder_gru')
 
         encoder_outputs, encoder_state = encoder(encoder_dropout)
-        #encoder_states = [state_h, state_c]
 
-        # Attention mechanism
-        attention_layer = BahdanauAttention(LATENT_DIM, name='attention_layer')
-        attention_result, attention_weights = attention_layer(encoder_state, encoder_outputs)
-
-        decoder_inputs = Input(shape=(None, self.num_decoder_tokens), name='decoder_input')
+        decoder_inputs = Input(shape=(self.max_decoder_seq_length, self.num_decoder_tokens), name='decoder_input')
         decoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='decoder_dropout')))(decoder_inputs)
 
         decoder_gru = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_gru')
         decoder_outputs, _ = decoder_gru(decoder_dropout, initial_state=encoder_state)
 
-        print(decoder_outputs)
-        decoder_outputs = Concatenate(axis=-1, name='concat_layer')([decoder_outputs, attention_weights])
-        print(decoder_outputs)
+        # Attention mechanism
+        attn_layer = AttentionLayer(name='attention_layer')
+        attn_out, attn_states = attn_layer([encoder_outputs, decoder_outputs])
+        decoder_outputs = Concatenate(axis=-1, name='concat_layer')([decoder_outputs, attn_out])
 
         decoder_dense = Dense(self.num_decoder_tokens, activation='softmax', name='decoder_activation_softmax')
-        dense_time = TimeDistributed(decoder_dense, name='time_distributed_layer')
-        decoder_outputs = dense_time(decoder_outputs)
+        decoder_outputs = TimeDistributed(decoder_dense, name='time_distributed_layer')(decoder_outputs)
 
         self.model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=[decoder_outputs])
         self.model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+        self.model.summary()
 
         self.encoder_model = Model(inputs=encoder_inputs, outputs=[encoder_outputs, encoder_state])
 
-        decoder_states_inputs = [Input(shape=(LATENT_DIM,))]
-        decoder_outputs, decoder_inf_state = decoder_gru(decoder_inputs, initial_state=decoder_states_inputs)
-        decoder_outputs = decoder_dense(decoder_outputs)
+        decoder_inf_inputs = Input(batch_shape=(None, 1, self.num_decoder_tokens), name='decoder_word_inputs')
+        encoder_inf_states = Input(batch_shape=(None, self.max_encoder_seq_length, LATENT_DIM), name='encoder_inf_states')
+        decoder_init_state = Input(batch_shape=(None, LATENT_DIM), name='decoder_init')
 
-        self.decoder_model = Model([decoder_inputs] + decoder_states_inputs, [decoder_outputs] + [state_h, state_c])
+        decoder_outputs, decoder_state = decoder_gru(decoder_inf_inputs, initial_state=decoder_init_state)
+        attn_out, attn_states = attn_layer([encoder_inf_states, decoder_outputs])
+        decoder_outputs = Concatenate(axis=-1, name='concat')([decoder_outputs, attn_out])
+        decoder_outputs = TimeDistributed(decoder_dense)(decoder_outputs)
+
+        self.decoder_model = Model(inputs=[encoder_inf_states, decoder_init_state, decoder_inf_inputs], 
+                                   outputs=[decoder_outputs, attn_states, decoder_state])
 
 
     def __train(self):
@@ -174,10 +146,14 @@ class Chatbot():
         np.save('models/input_mapper_tok2num.npy', self.input_mapper.tok2num)
         np.save('models/input_mapper_num2tok.npy', self.input_mapper.num2tok)
 
+        print(self.encoder_input_data.shape)
+        print(self.decoder_input_data.shape)
+        print(self.decoder_target_data.shape)
+
         self.model.fit([self.encoder_input_data, self.decoder_input_data], self.decoder_target_data,
-                        batch_size=BATCN_SIZE,
+                        #batch_size=BATCN_SIZE,
                         epochs=NUM_EPOCHS,
-                        validation_split=0.2,
+                        #validation_split=0.2,
                         initial_epoch=int(os.getenv('INITIAL_EPOCH', 1))
                         )
 
@@ -201,7 +177,8 @@ class Chatbot():
             input_sequence[0, i, self.target_mapper.tok2num[token]] = 1
 
         # Get decoder inputs/encoder outputs
-        states = self.encoder_model.predict(input_sequence)
+        enc_out, enc_state = self.encoder_model.predict(input_sequence)
+        dec_state = enc_state
 
         # Setup decoder inputs
         target_sequence = np.zeros((1, 1, self.num_decoder_tokens))
@@ -213,7 +190,7 @@ class Chatbot():
 
         while True:
             # Predict output.
-            output_tokens, state_h, state_c = self.decoder_model.predict([target_sequence] + states)
+            output_tokens, attention, dec_state = self.decoder_model.predict([enc_out, dec_state, target_sequence])
             sample = np.argmax(output_tokens[0, -1, :])
             word = self.target_mapper.num2tok[sample]
 
@@ -226,8 +203,6 @@ class Chatbot():
             target_sequence = np.zeros((1, 1, self.num_decoder_tokens))
 
             target_sequence[0, 0, sample] = 1
-
-            states = [state_h, state_c]
 
         return ' '.join(output)
 
