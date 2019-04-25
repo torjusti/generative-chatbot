@@ -133,33 +133,41 @@ responds with an answer to each user query.
  av forskjellige modeller
 \fi
 
-This project's main goal was to explore the possibility of generative chatbots
-in Norwegian. One of the prerequisites for a language-specific language
-generation system to work is data. The language generation method is highly
-dependant on the amount and quality of data available. The method of choice was
-the sequence-to-sequence model proposed by Cho et al. in their paper \cite{Cho2014}.
+The main goal of this project was to explore the possibility of generative
+chatbots using Norwegian. In order to do this, we implement a  baseline generative
+chatbot model. We then train this model using both Norwegian and English data
+in order to compare the effectiveness of the model for Norwegian in comparison
+with English. The method of choice in this projet was a simple
+sequence-to-sequence model, as proposed by Cho et al. in their paper
+\cite{Cho2014}.
+
+\paragraph{}
+One of the prerequisites for a language generation system such as a chatbot is
+data in the language being generated. The langauge generation greatly depends
+on the amount and qualtity of the available data. In this project, we perform
+comparisons using similar conditions for both English and Norwegian, in order
+to establish the effectiveness of the \emph{model} for the Norwegian language.
 
 \paragraph{}
 Sequence-to-sequence models have proven to be an excellent baseline for
-chatbots \cite{Vinyals2015}. When considering a user-initiative only model the
-task of a generative chatbot system can be reduced to mapping introductory
-utterances to a target utterance.  Models with a sufficiently large corpus for
-example-based `translation' had been shown to produce promising results in the
-given corpus language \cite{Ezquerra2018}. Although these bots are not able to apply any logic to their answers, they are able to mimic natural human
-language.
+chatbot models \cite{Vinyals2015}. When considering a user-initiative only
+model the task of a generative chatbot system can be reduced to mapping an
+input utterance to a target utterance. This is analogous to how the same type
+of model is applied for neural machine translation. Chatbot models with a
+sufficiently large corpus for such example-based ``translation'' have been
+shown to produce promising results \cite{Ezquerra2018}. Although these bot are
+not able to apply any real logic to their answers, they are certainly able to
+mimic natural human language.
 
 \paragraph{}
-The architecture is built using Google's Machine Learning framework TensorFlow
-as a backend with Keras as a high-level wrapper. The architecture looks at a
-model using Long Short Term Memory (LSTM) nodes with word-level context and a
+The model in this project utilises Google's Machine Learning framework
+TensorFlow as a backend with Keras as a high-level wrapper. The architecture
+utilises Long Short Term Memory (LSTM) nodes with word-level context and a
 three-dimensional sequence embedding. This architecture can be further
-developed using a word-level embedding such as \textit{Word2Vec}
-\cite{word2vec} and sequence-level context like the Bahdanau Attention mechanism
-\cite{Bahdanau2015}.
-\todo{Rewrite paragraph slightly. Also, add more information about why
-we believe this will illustrate the effectiveness of Norwegian chatbots.}
-\todo{Planen er å vise at norske chatbots går an, sammenligne flere
-forskjellige}
+developed using a word-level embedding system such as \textit{Word2Vec}
+\cite{word2vec} and sequence-level context like the Bahdanau attention
+mechanism \cite{Bahdanau2015}.
+\todo{Rewrite slightly. BERT rather than word2vec, and I still don't understand this context shit tbh :'(}
 
 \section*{Data}
 Norwegian chatbot training data is not readily available, but relevant corpora
