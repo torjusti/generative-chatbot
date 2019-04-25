@@ -12,6 +12,7 @@ corpus
 *.bcf
 *.blg
 *.xml
+*.dvi
 
 # Model files
 *.h5
