@@ -143,7 +143,7 @@ class Chatbot():
         ''' Generate a reply using sampling. '''
         # Perform preprocessing on input.
         if not isinstance(query, list):
-            query = pad_tokens(wrap_utterance(tokenize(query)[:MAX_NUM_TOKENS]), self.max_encoder_seq_length)
+            query = pad_tokens(wrap_utterance(tokenize(query.lower())[:MAX_NUM_TOKENS]), self.max_encoder_seq_length)
 
         input_sequence = np.zeros((1, self.max_encoder_seq_length, self.num_encoder_tokens), dtype='float32')
 

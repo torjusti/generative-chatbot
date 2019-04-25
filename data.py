@@ -31,17 +31,22 @@ UNKNOWN_TOKEN = '<unk>'
 PAD_TOKEN = '<pad>'
 
 
-def clean_content(content):
+def clean_content(content, decode_content=True):
     ''' Cleans the text belonging to a content in the Facebook data. '''
-    # Facebook encodes the data in their exports incorrectly. We can work around
-    # this error by encoding the data as Latin-1 and decoding again as UTF-8.
-    content = content.encode('latin1').decode('utf8')
+    if decode_content:
+        # Facebook encodes the data in their exports incorrectly. We can work around
+        # this error by encoding the data as Latin-1 and decoding again as UTF-8.
+        content = content.encode('latin1').decode('utf8')
+
     # Convert all text to lowercase.
     content = content.lower()
+
     # Remove all punctuation from text.
     content = re.sub('[{}]'.format(re.escape(string.punctuation)), '', content)
+
     # Replace newlines with spaces.
     content = re.sub('\n', ' ', content)
+
     # Return the cleaned content.
     return content
 
@@ -78,7 +83,10 @@ def get_cornell_utterance_pairs():
 
     with open('corpus/cornell/movie_lines.txt', encoding='latin-1') as f:
         # Read utterances from Cornell corpus file.
-        lines = [line.split('+++$+++')[-1].strip() for line in f.readlines()][:MAX_NUM_UTTERANCES]
+        lines = [
+            clean_content(line.split('+++$+++')[-1].strip(), decode_content=False)
+            for line in f.readlines()
+        ][:MAX_NUM_UTTERANCES]
 
     for i, utterance in enumerate(lines[1:], 1):
         # Tokenize input and target utterances.
