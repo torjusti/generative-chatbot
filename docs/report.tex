@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{titlesec}
 \usepackage[T1]{fontenc}
+\usepackage{nameref}
 
 % TODO: Tren og evaluer standard 300, kompleks 300, attention bot
 % skriv rapport
@@ -139,14 +140,14 @@ dependant on the amount and quality of data available. The method of choice was
 the sequence-to-sequence model proposed by Cho et al. in their paper \cite{Cho2014}.
 
 \paragraph{}
-Sequence-to-sequence models have proven to be providing an excellent baseline.
-When considering a user-initiative only model the task of a generative chatbot
-system can be reduced to mapping introductory utterances to a responsive target
-utterance.  Models with a sufficiently large corpus for example based
-`translation' had been shown to produce promising results in the given corpus
-language \cite{Ezquerra2018}. Although these bots are not able apply any logic
-to their answers, they are able to mimic natural human language.
-\todo{Fix weird typo.}
+Sequence-to-sequence models have proven to be an excellent baseline for
+chatbots \cite{Vinyals2015}. When considering a user-initiative only model the
+task of a generative chatbot system can be reduced to mapping introductory
+utterances to a target utterance.  Models with a sufficiently large corpus for
+example-based `translation' had been shown to produce promising results in the
+given corpus language \cite{Ezquerra2018}. Although these bots are not able
+apply any logic to their answers, they are able to mimic natural human
+language.
 
 \paragraph{}
 The architecture is built using Google's Machine Learning framework TensorFlow
@@ -158,6 +159,8 @@ developed using a word-level embedding such as \textit{Word2Vec}
 \cite{Bahdanau2015}.
 \todo{Rewrite paragraph slightly. Also add more information about why
 we believe this will illustrate the effectiveness of Norwegian chatbots.}
+\todo{Planen er å vise at norske chatbots går an, sammenligne flere
+forskjellige}
 
 \section*{Data}
 Norwegian chatbot training data is not readily available, but relevant corpora
@@ -232,7 +235,6 @@ significantly more complex model. We use the Norwegian NLTK tokenizer to split
 the text into words. Lastly, each utterance is wrapped in a special start and
 end token, which indicates to the model when it should stop generating text
 during the inference phase.
-\todo{Might not want to use the word inference phase, not defined.}
 
 \paragraph{}
 The preprocessing system also performs filtering on which utterances should
@@ -269,7 +271,8 @@ With a corpus $D = \{\text{``How are you doing?''}\}$ containing utterances,
 a vocabulary $\vec{V}$ containing all distinct words in the corpus is
 constructed. This is used to build a mapping where each token is mapped to
 its corresponding index in the vocabulary vector $\vec{V}$. This mapping is
-then used to encode utterances as vectors. Table \ref{tab:tok2num} illustrates
+then used to encode utterances as vectors. Table 1 illustrates
+%WATCHOUTWATCHOUTWATCHOUTWATCHOUTWATCHOUTWATCHOUTWATCHOUT
 this mapping. Note that there are three special tokens representing beginning
 of sequence, padding and end of sequence.
 \todo{Refer to more equations and fix broken table reference.}
@@ -304,11 +307,9 @@ word vector $\vec{v}_2$.
 \end{equation}
 
 \paragraph{}
-Using these word vectors, a sequence matrix can be constructed by a vector of
-row vectors. The sequence matrix $d_0$ is sequence embedding of utterance in
-the initial dataset $D$.
-\todo{I haven't heard the term sequence matrix before. This is just an
-one-hot encoding of the tokens in the sequence.}
+Using these word vectors, a matrix of one-hot encoded row vectors can be
+constructed by a vector of row vectors. The matrix $d_0$ is the embedding of
+the utterance sequence in the initial dataset $D$.  
 
 \begin{equation}
   d_{0} = 
@@ -335,9 +336,8 @@ that its length is 5, excluding the beginning- and end of sequence tokens.
 \paragraph{}
 This sequence embedding is used to extract the necessary features needed to
 make a statistical prediction of the next token in an output sequence, given an
-input sequence. The extracted features and be considered as the context of the
-token's occurrences.
-\todo{I don't understand this paragraph.}
+input sequence. The extracted features are the context of the token's
+occurrences.
 
 \subsection*{Model}
 This project utilises a fairly standard sequence-to-sequence model implemented
@@ -352,7 +352,7 @@ last layer of the model.
     \centering
     \makebox[\linewidth][c]
       {
-        \includegraphics[width=0.9\textwidth]
+        \includegraphics[width=1.1\textwidth]
         {model.png}
       }
     \caption{The Keras model behind the chatbot.}
