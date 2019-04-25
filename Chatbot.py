@@ -12,6 +12,7 @@ from data import (get_utterance_pairs, TokenMapper, pad_tokens, tokenize, wrap_u
 LATENT_DIM = 256
 BATCN_SIZE = 64
 NUM_EPOCHS = 200
+DROPOUT_RATE = 0.2
 
 MODEL_PATH = 'models/model.h5'
 
@@ -80,15 +81,18 @@ class Chatbot():
 
     def __build_model(self):
         ''' Construct the model used to train the chatbot. '''
-        encoder_inputs = Input(shape=(None, self.num_encoder_tokens))
-        encoder = CuDNNLSTM(LATENT_DIM, return_state=True)
-        encoder_outputs, state_h, state_c = encoder(encoder_inputs)
+        encoder_inputs = Input(shape=(None, self.num_encoder_tokens), name='encoder_input')
+        encoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='encoder_dropout')))(encoder_inputs)
+        encoder = CuDNNLSTM(LATENT_DIM, return_state=True, name='encoder_lstm')
+
+        encoder_outputs, state_h, state_c = encoder(encoder_dropout)
         encoder_states = [state_h, state_c]
 
-        decoder_inputs = Input(shape=(None, self.num_decoder_tokens))
-        decoder_lstm = CuDNNLSTM(LATENT_DIM, return_sequences=True, return_state=True)
-        decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
-        decoder_dense = Dense(self.num_decoder_tokens, activation='softmax')
+        decoder_inputs = Input(shape=(None, self.num_decoder_tokens), name='decoder_input')
+        decoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='decoder_dropout')))(decoder_inputs)
+        decoder_lstm = CuDNNLSTM(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_lstm')
+        decoder_outputs, _, _ = decoder_lstm(decoder_dropout, initial_state=encoder_states)
+        decoder_dense = Dense(self.num_decoder_tokens, activation='softmax', name='decoder_activation_softmax')
         decoder_outputs = decoder_dense(decoder_outputs)
 
         self.model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
