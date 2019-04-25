@@ -119,7 +119,7 @@ class Chatbot():
         ''' Construct the model used to train the chatbot. '''
         encoder_inputs = Input(shape=(None, self.num_encoder_tokens), name='encoder_input')
         encoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='encoder_dropout')))(encoder_inputs)
-        encoder = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='encoder_lstm')
+        encoder = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='encoder_gru')
 
         encoder_outputs, encoder_state = encoder(encoder_dropout)
         #encoder_states = [state_h, state_c]
@@ -131,8 +131,8 @@ class Chatbot():
         decoder_inputs = Input(shape=(None, self.num_decoder_tokens), name='decoder_input')
         decoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='decoder_dropout')))(decoder_inputs)
 
-        decoder_lstm = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_lstm')
-        decoder_outputs, _ = decoder_lstm(decoder_dropout, initial_state=encoder_state)
+        decoder_gru = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_gru')
+        decoder_outputs, _ = decoder_gru(decoder_dropout, initial_state=encoder_state)
 
         print(decoder_outputs)
         decoder_outputs = Concatenate(axis=-1, name='concat_layer')([decoder_outputs, attention_weights])
@@ -148,7 +148,7 @@ class Chatbot():
         self.encoder_model = Model(inputs=encoder_inputs, outputs=[encoder_outputs, encoder_state])
 
         decoder_states_inputs = [Input(shape=(LATENT_DIM,))]
-        decoder_outputs, decoder_inf_state = decoder_lstm(decoder_inputs, initial_state=decoder_states_inputs)
+        decoder_outputs, decoder_inf_state = decoder_gru(decoder_inputs, initial_state=decoder_states_inputs)
         decoder_outputs = decoder_dense(decoder_outputs)
 
         self.decoder_model = Model([decoder_inputs] + decoder_states_inputs, [decoder_outputs] + [state_h, state_c])

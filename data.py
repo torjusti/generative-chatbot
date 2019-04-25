@@ -9,7 +9,7 @@ import nltk
 MAX_NUM_TOKENS = os.getenv('MAX_NUM_TOKENS', 20)
 
 # Set the maximum number of utterances to load.
-MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 250000)
+MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 25)
 
 # The maximum number of words which are considered. This value
 # is the number of most common words which get included in embedding.
