@@ -365,22 +365,41 @@ is fed the target sequence - that is, the response utterance. As a target for
 output, the decoder is fed the same target sequence, but shifted to the right
 by one. This is a training method which is known as teacher forcing. It simply
 means that the network is taught to output token $n$ in the utterance, given
-token $n-1$ as input.
-\todo{Alteratives to teacher forcing.}
+token $n-1$ as input. The alternative to teacher forcing is to feed the decoder
+prediction back into the decoder output, instead of always using the ground
+truth as the decoder input. However, not using teacher forcing generally makes
+training slower and the model unstable.
+\todo{Finn kilde for siste del om teacher forcing.}
 \todo{I don't really understand this stuff thoroughly. Triple check solidness, elaborate more.}
 \todo{Object oriented system. Explain LSTM nodes. Object oriented system. How we fit the model. Epochs, batches.}
 
 \subsection*{Inference}
 
+Once a model is trained, we can use it to generate responses to input
+utterances. This is a separate phase from the training phase, which is usually
+referred to as the inference phrase. We now provide a high-level description
+of the inference phase used in this chatbot system.
 
-%# Next: inference mode (sampling).
-%# Here's the drill:
-%# 1) encode input and retrieve initial decoder state
-%# 2) run one step of decoder with this initial state
-%# and a "start of sequence" token as target.
-%# Output will be the next target token
-%# 3) Repeat with the current target token and current states
+\paragraph{}
+When the system receives an input utterance from the user, we first run the
+preprocessing step on the utterance to ensure it conforms to the same
+specifications as the input data used while training. Then, this processed
+input utterance is fed to the encoder, and the final hidden encoder state is
+used as the initial state for the decoder, just as in the training phase. We
+then run the decoder, using the special \emph{<BOS>} token as the input. This
+yields the initial token of the response utterance. The system then feeds this
+token back into the decoder, and uses it to generate the next token in the
+utterance. At each step in this process, the system picks the most likely
+token. This process halts when the special \emph{<EOS>} token is generated,
+at which point the response utterance is returned to the user.
+\todo{Might want to discuss the stated stored at each step, but I don't really know enough about that stuff to write about it.}
 
+\paragraph{}
+The inference system just described is a greedy decoding scheme, as the token
+picked is always just the most likely token. However, this basic scheme does
+not always yield the most likely \emph{utterance}. Future work might explore
+alternative inference schemes based on algorithms such as beam search, which
+seek to maximize the probability for the entire output utterance.
 
 \subsection*{}
 
