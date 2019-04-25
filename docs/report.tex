@@ -369,13 +369,12 @@ the final hidden encoder state as its own initial state, so that the decoder
 also has information about the input utterance. As input, the decoder layer
 is fed the target sequence - that is, the response utterance. As a target for
 output, the decoder is fed the same target sequence, but shifted to the right
-by one. This is a training method which is known as teacher forcing. It simply
-means that the network is taught to output token $n$ in the utterance, given
-token $n-1$ as input. The alternative to teacher forcing is to feed the decoder
-prediction back into the decoder output, instead of always using the ground
-truth as the decoder input. However, not using teacher forcing generally makes
-training slower and the model unstable.
-\todo{Finn kilde for siste del om teacher forcing.}
+by one. This is a training method which is known as teacher forcing
+\cite{teacher-forcing}. It simply means that the network is taught to output
+token $n$ in the utterance, given token $n-1$ as input. The alternative to
+teacher forcing is to feed the decoder prediction back into the decoder output,
+instead of always using the ground truth as the decoder input. However, not
+using teacher forcing generally makes training slower and the model unstable.
 \todo{I don't really understand this stuff thoroughly. Triple check solidness, elaborate more.}
 \todo{Object oriented system. Explain LSTM nodes. Object oriented system. How we fit the model. Epochs, batches.}
 
