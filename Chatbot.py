@@ -1,10 +1,7 @@
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
-#import keras
-#from keras import backend as K
-#import tensorflow.python.keras as keras
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Multiply, Add, Dense, LSTM, GRU, CuDNNLSTM, Input, Embedding, TimeDistributed, Flatten, Dropout, Lambda, Concatenate
+from tensorflow.python.keras.layers import Dense, GRU, Input, TimeDistributed, Dropout, Concatenate
 from collections import defaultdict
 from attention_keras.layers.attention import AttentionLayer
 import numpy as np
@@ -146,14 +143,10 @@ class Chatbot():
         np.save('models/input_mapper_tok2num.npy', self.input_mapper.tok2num)
         np.save('models/input_mapper_num2tok.npy', self.input_mapper.num2tok)
 
-        print(self.encoder_input_data.shape)
-        print(self.decoder_input_data.shape)
-        print(self.decoder_target_data.shape)
-
         self.model.fit([self.encoder_input_data, self.decoder_input_data], self.decoder_target_data,
-                        #batch_size=BATCN_SIZE,
+                        batch_size=BATCN_SIZE,
                         epochs=NUM_EPOCHS,
-                        #validation_split=0.2,
+                        validation_split=0.2,
                         initial_epoch=int(os.getenv('INITIAL_EPOCH', 1))
                         )
 
