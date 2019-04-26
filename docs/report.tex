@@ -57,14 +57,13 @@ of the language as well as the lack of available training data.
 
 \paragraph{}
 We present an implementation of a generic-domain chatbot system using a simple
-sequence-to-sequence model, a kind of model which primarily is applied to
-neural machine translation but which also has proven effective for chatbot
-systems. We believe our results illustrate that neural machine translation
-techniques indeed can be applied to create chatbots in both Norwegian as
-well as English, as long as enough training data of a sufficiently high
-quality is available. However, we stress that in many cases such training
-data in Norwegian can be hard to obtain.
-\todo{Snik inn attention.}
+sequence-to-sequence model with attention, a kind of model which primarily is
+applied to neural machine translation but which also has proven effective for
+chatbot systems. We believe our results illustrate that neural machine
+translation techniques indeed can be applied to create chatbots in both
+Norwegian as well as English, as long as enough training data of a
+sufficiently high quality is available. However, we stress that in many cases
+such training data in Norwegian can be hard to obtain.  
 
 \end{abstract}
 
@@ -93,9 +92,9 @@ sequence-to-sequence models \cite{Cho2014} can be used to create
 general-purpose Norwegian chatbots. Such models are usually used for machine
 translation, but they have also proven effective in the field of chatbots.
 Therefore, the main objective of this project is to implement a simple Norwegian
-chatbot using a sequence-to-sequence model, which for example could be used as
-a small talk module in another mode domain-specific chatbot.
-\todo{Kanskje snik inn attention.}
+chatbot using a sequence-to-sequence model with an attention mechanism
+\cite{Bahdanau2015}, which for example could be used as a small talk module in
+another mode domain-specific chatbot.
 
 \paragraph{}
 We differ between retrieval-based and generative chatbots. A retrieval-based
@@ -136,11 +135,11 @@ chatbots using Norwegian. In order to do this, we implement a simple generative
 chatbot model. We then train this model using both Norwegian and English data
 in order to compare the effectiveness of the model for Norwegian with that of
 English. The method of choice in this project was a simple sequence-to-sequence
-model, as proposed by Cho et al. in their paper \cite{Cho2014}. In order to
-compare the Norwegian and English models, we provide our own observations of
-the model performance as well as user evaluations of the systems, where we
-have gotten a set of people to compare the models with each other.
-\todo{Snik inn attention.}
+model, as proposed by Cho et al. in their paper \cite{Cho2014}, with an
+attention mechanism \cite{Bahdanau2015}. In order to compare the Norwegian and
+English models, we provide our own observations of the model performance as
+well as user evaluations of the systems, where we have gotten a set of people
+to compare the models with each other.
 
 \paragraph{}
 One of the prerequisites for a language generation system such as a chatbot is
@@ -165,17 +164,22 @@ sufficiently large corpus for such example-based ``translation'' have been
 shown to produce promising results \cite{Ezquerra2018}. Although these bot are
 not able to apply any real logic to their answers, they are certainly able to
 mimic natural human language.
-\todo{Attention her og, kanskje. Kanskje flytt avsnittet opp et hakk.}
+
+With appropriate additions to encoder-decoder models it is able to produce
+comparable results to state of the art phrase-based systems for machine
+translation, as shown by Bahdanau, Cho \& Bengio in their paper on the attention
+mechanism \cite{Bahdanau2015}.
 
 \paragraph{}
 The model in this project utilises Google's Machine Learning framework
 TensorFlow as a backend with Keras as a high-level wrapper. The architecture
-utilises Long Short Term Memory (LSTM) nodes with word-level context and a
-three-dimensional sequence embedding. This architecture can be further
-developed using a word-level embedding system such as \textit{Word2Vec}
-\cite{word2vec} and sequence-level context like the Bahdanau attention
-mechanism \cite{Bahdanau2015}.
-\todo{Rewrite. Remove attention. BERT.}
+utilises Gated Recurrent Units (GRU) with a three-dimensional sequence
+embedding. The architecture has been extended with Bahdanau Attention, allowing
+for the decoder inputs to consider a \textit{context} vector instead of the
+entire encoder output.
+
+This architecture can be further developed using a word-level embedding system
+such as \textit{Word2Vec} \cite{word2vec}.
 
 \section*{Data}
 Norwegian chatbot training data is not readily available, but relevant corpora
@@ -197,8 +201,21 @@ easily be able to generate several tens of thousands of utterances over the
 course of a few years. More avid users of the platform can have chat logs
 containing several hundred thousands or even millions of messages. This project
 combines the utterances of two Facebook users, ending in a corpus with more
-than 110,000 utterance pairs.
+than 110,000 utterance pairs. However, processing such a dataset has proven a
+challenge.
 \todo{Challenges arising from very varying data from person to person.}
+
+\paragraph{}
+With a maximum sequence length $max\_seq\_length$ of $20$, a vocabulary size
+$vocab\_s$ of $5000$ and $110,000$ utterances stored in a 32bit float format,
+storing it requires 
+\begin{align*}
+  max\_seq\_length &\times vocab\_s \times 110,000 \times 32\\
+  &= 20 \times 5000 \times 110,000 \times 32 = 3.52E+10\text{bytes}\\
+  &= 352 GB
+\end{align*}
+352GB of memory. During this project, only 32GB of memory was available at a
+time, and so the usable corpus was reduced to a tenth: 10,000 utterances.
 
 \paragraph{}
 In addition to using personal Facebook Messenger data, the Cornell Movie
@@ -218,13 +235,13 @@ This output vector is sometimes referred to as a thought vector, as it stores
 the system's understanding of the input. For machine translation, we would feed
 the encoder RNN the sentence to be translated, and for chatbots, the encoder
 RNN would accept the input sentence which should be responded to. The decoder
-RNN is trained to take thought vectors from the encoder and output tokens
-one by one until an end of sequence token is outputted. Since the decoder
-network is dependent on the output of the encoder network, both networks are
-trained together. This simple model has proven very effective for neural
-machine translation and other tasks as well. An early description of this
-architecture is available in \cite{Cho2014}.
-\todo{Mention attention here as well.}
+RNN is trained to take context vectors from the attention layer and output
+tokens from the encoder one by one until an end of sequence token is outputted.
+Since the decoder network is dependent on the output of the encoder network and
+the attention mechanism, all three are trained together. This model has proven
+very effective for neural machine translation and other tasks as well. An early
+description of this architecture is available in \cite{Cho2014} and
+\cite{Bahdanau2015}.
 
 \paragraph{}
 The rest of this section is dedicated to describing the architecture of
@@ -286,13 +303,12 @@ then used to encode utterances as vectors. Table 1 illustrates
 %WATCHOUTWATCHOUTWATCHOUTWATCHOUTWATCHOUTWATCHOUTWATCHOUT
 this mapping. Note that there are three special tokens representing the
 beginning of the sequence, padding and end of the sequence.
-\todo{Refer to more equations and fix broken table reference.}
 
-\begin{equation}
+$$
    \vec{V} = [ \textrm{<BOS>},\, \textrm{<PAD>},\, \textrm{``how''},\,
                \textrm{``are''},\, \textrm{``you''},\, \textrm{``doing''},\,
                \textrm{<EOS>}]
- \end{equation}
+$$
 
 \begin{table}[hbt]
   \begin{center}
@@ -313,16 +329,16 @@ sequence is shorter than this, the rest of the sequence matrix is filled with
 padding tokens. Using the vocabulary above, the word ``how'' is mapped to the
 word vector $\vec{v}_2$.
 
-\begin{equation}
+$$
   \vec{v}_2 = [0, 0, 1, 0, 0, 0, 0] \quad {\leftrightarrow} \quad \textrm{``how''}
-\end{equation}
+$$
 
 \paragraph{}
 Using these word vectors, a matrix of one-hot encoded row vectors can be
 constructed. This matrix $d_0$ is the embedding of the utterance sequence
 in the initial dataset $D$.  
 
-\begin{equation}
+$$
   d_{0} = 
     \begin{bmatrix}
       0 & 1 & 0 & 0 & 0 & 0 & 0\\
@@ -333,7 +349,7 @@ in the initial dataset $D$.
       1 & 0 & 0 & 0 & 0 & 0 & 0\\
       0 & 0 & 0 & 0 & 0 & 0 & 1\\
     \end{bmatrix}
-\end{equation}
+$$
 
 \paragraph{}
 Equation \ref{eq:seq-out} show the exact sequence represented by $d_0$. Notice
@@ -351,14 +367,17 @@ input sequence. The extracted features are the context of the token's
 occurrences.
 
 \subsection*{Model}
-This project utilises a fairly standard sequence-to-sequence model implemented
-using Keras, which is illustrated in figure \ref{fig:keras-model}. The encoder
-consists of an input layer, another layer with dropout and an LSTM layer which
-feeds into the decoder. The decoder is structured similarly, consisting of an
-input layer, a dropout layer, a decoder dropout layer and a dense layer as the
-last layer of the model. We use a dropout factor of 0.2.
-\todo{Attention.}
-\todo{Is dropout factor the correct term?}
+This project utilises a fairly standard sequence-to-sequence model with
+attention implemented using Keras, which is illustrated in figure
+\ref{fig:keras-model}. Keras and TensorFlow does not natively support
+attention resulting in using a custom implementation of an attention layer
+\cite{keras-attention} that has been heavily modified to fit into the rest of
+the Keras model.  The encoder consists of an input layer, another layer with
+dropout and a GRU layer which feeds into the decoder. The decoder is structured
+similarly, consisting of an input layer, a dropout layer, a decoder dropout
+layer and a dense layer as the last layer of the model. We use a dropout factor
+of 0.2.
+\todo{Add attention once we have the output image}
 
 \begin{center}
   \begin{figure}[hbt]
@@ -372,18 +391,23 @@ last layer of the model. We use a dropout factor of 0.2.
     \label{fig:keras-model}
   \end{figure}
 \end{center}
-\todo{Update model with attention.}
 
-In this model, the encoder LSTM is fed one-hot encoded utterances one at a
+\todo{Update model with attention.}
+In this model, the encoder GRU is fed one-hot encoded utterances one at a
 time. Recall that the purpose of this step is to create a compact, internal
 representation of the input utterance - a thought vector, so to speak. The
-encoder LSTM outputs a list containing outputs from the encoder as well as the
-internal encoder state. The decoder LSTM discards the LSTM output but uses
-the final hidden encoder state as its own initial state, so that the decoder
-also has information about the input utterance. As input, the decoder layer
-is fed the target sequence - that is, the response utterance. As a target for
-output, the decoder is fed the same target sequence, shifted to the right
-by one. This is a training method which is known as teacher forcing
+encoder GRU outputs a list containing outputs from the encoder as well as the
+internal encoder state. The decoder GRU giscards the GRU output but uses the
+final hidden encoder state as its own initial state, so that the decoer also
+has information about the input utterance. As input, the decoder activation
+layer is fed a concatenation of the decoder GRU outputs and the attention layer
+outputs. Note that the attention layer output is a function of the encoder
+outputs and the decoder GRU outputs. 
+
+\paragraph{}
+During training the decoder is fed the target sequence - that is, the target
+utterance. As a target for the output, the decoder is fed the same target utterance, shifted to the right by one.
+This is a training method which is known as teacher forcing
 \cite{teacher-forcing}. It simply means that the network is taught to output
 token $n$ in the utterance, given token $n-1$ as input. The alternative to
 teacher forcing is to feed the decoder prediction back into the decoder output,
@@ -407,14 +431,16 @@ When the system receives an input utterance from the user, we first run the
 preprocessing step on the utterance to ensure it conforms to the same
 specifications as the input data used while training. Then, this processed
 input utterance is fed to the encoder, and the final hidden encoder state is
-used as the initial state for the decoder, just as in the training phase. We
-then run the decoder, using the special \emph{<BOS>} token as the input. This
-yields the initial token of the response utterance. The system then feeds this
-token back into the decoder and uses it to generate the next token in the
-utterance. At each step in this process, the system picks the most likely
-token. This process halts when the special \emph{<EOS>} token is generated,
-at which point the response utterance is returned to the user.
-\todo{Might want to discuss the stated stored at each step.}
+used as the initial state for the decoder, just as in the training phase.
+Recall that only the decoder GRU uses the hidden encoder state. The dense
+activation layer of the GRU that actually makes the prediction, uses the
+context state given by the attention layer. We then run the decoder, using the
+special \emph{<BOS>} token as the input.  This yields the initial token of the
+response utterance. The system then feeds this token back into the decoder and
+uses it to generate the next token in the utterance. At each step in this
+process, the system picks the most likely token. This process halts when the
+special \emph{<EOS>} token is generated, at which point the response utterance
+is returned to the user.
 
 \paragraph{}
 The inference system just described is a greedy decoding scheme, as the token
