@@ -165,20 +165,17 @@ mechanism \cite{Bahdanau2015}. It is likely that attention mechanisms also can
 provide better results for chatbots.
 
 \paragraph{}
-The model in this project utilises Google's Machine Learning framework
-TensorFlow as a backend with Keras as a high-level wrapper. The architecture
-utilises Gated Recurrent Units (GRU) with a three-dimensional sequence
-embedding. The architecture has been extended with Bahdanau Attention, allowing
-for the decoder inputs to consider a \textit{context} vector instead of the
-entire encoder output.
-\todo{I propose the paragraph in the source code, because three dimensional
-sequence embedding doesnt really mean much. Also, I think we should consider
-moving this paragraph out of this section.}
-%The model in this project is implementing using TensorFlow, a machine learning
-%framework by Google, with Keras as a high-level wrapper. The architecture is 
-%a sequence-to-sequence model which utilises Gated Recurrent Units. The model
-%has also been extended with Bahdanau attention, allowing for the decoder inputs
-%to consider a concext vector instead of the entire encoder output.
+%The model in this project utilises Google's Machine Learning framework
+%TensorFlow as a backend with Keras as a high-level wrapper. The architecture
+%utilises Gated Recurrent Units (GRU) with a three-dimensional sequence
+%embedding. The architecture has been extended with Bahdanau Attention, allowing
+%for the decoder inputs to consider a \textit{context} vector instead of the
+%entire encoder output.
+The model in this project is implemented using TensorFlow, a machine learning
+framework by Google, with Keras as a high-level wrapper. The architecture is 
+a sequence-to-sequence model which utilises Gated Recurrent Units. The model
+has also been extended with Bahdanau attention, allowing for the decoder inputs
+to consider a concext vector instead of the entire encoder output.
 
 \paragraph{}
 This architecture can be further developed using a word-level embedding system
@@ -240,14 +237,12 @@ the system's understanding of the input. For machine translation, we would feed
 the encoder RNN the sentence to be translated, and for chatbots, the encoder
 RNN would accept the input sentence which should be responded to. The decoder
 RNN is trained to take context vectors from the attention layer and output
-tokens from the encoder one by one until an end of sequence token is outputted.
+tokens from the encoder one by one until an end-of-sequence token is outputted.
 Since the decoder network is dependent on the output of the encoder network and
 the attention mechanism, all three are trained together. This model has proven
 very effective for neural machine translation and other tasks as well. An early
 description of this architecture is available in \cite{Cho2014} and
 \cite{Bahdanau2015}.
-\todo{Maybe output vector -> final encoder state, instead of output = thought vector?
-Check this paragrah out.}
 
 \paragraph{}
 The rest of this section is dedicated to describing the architecture of
@@ -401,7 +396,6 @@ has information about the input utterance. As input, the decoder activation
 layer is fed a concatenation of the decoder GRU outputs and the attention layer
 outputs. Note that the attention layer output is a function of the encoder
 outputs and the decoder GRU outputs.
-\todo{For these two paragraphs, check state vs output?}
 
 \begin{center}
   \begin{figure}[hbt]
