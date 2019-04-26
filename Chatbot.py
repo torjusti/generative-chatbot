@@ -14,7 +14,7 @@ from data import (get_utterance_pairs, TokenMapper, pad_tokens, tokenize, wrap_u
 
 LATENT_DIM = 256
 BATCN_SIZE = 64
-NUM_EPOCHS = 200
+NUM_EPOCHS = 300
 DROPOUT_RATE = 0.2
 
 MODEL_PATH = 'models/model.h5'
@@ -85,13 +85,13 @@ class Chatbot():
     def __build_model(self):
         ''' Construct the model used to train the chatbot. '''
         encoder_inputs = Input(shape=(self.max_encoder_seq_length, self.num_encoder_tokens), name='encoder_input')
-        encoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='encoder_dropout')))(encoder_inputs)
+        encoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='encoder_dropout'), name='time_distributed_dropout_encoder'))(encoder_inputs)
         encoder = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='encoder_gru')
 
         encoder_outputs, encoder_state = encoder(encoder_dropout)
 
         decoder_inputs = Input(shape=(self.max_decoder_seq_length, self.num_decoder_tokens), name='decoder_input')
-        decoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='decoder_dropout')))(decoder_inputs)
+        decoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='decoder_dropout'), name='time_distributed_dropout_decoder'))(decoder_inputs)
 
         decoder_gru = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_gru')
         decoder_outputs, _ = decoder_gru(decoder_dropout, initial_state=encoder_state)
@@ -102,7 +102,7 @@ class Chatbot():
         decoder_outputs = Concatenate(axis=-1, name='concat_layer')([decoder_outputs, attn_out])
 
         decoder_dense = Dense(self.num_decoder_tokens, activation='softmax', name='decoder_activation_softmax')
-        decoder_outputs = TimeDistributed(decoder_dense, name='time_distributed_layer')(decoder_outputs)
+        decoder_outputs = TimeDistributed(decoder_dense, name='time_distributed_dense_activation')(decoder_outputs)
 
         self.model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=[decoder_outputs])
         self.model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
@@ -162,7 +162,7 @@ class Chatbot():
         ''' Generate a reply using sampling. '''
         # Perform preprocessing on input.
         if not isinstance(query, list):
-            query = pad_tokens(wrap_utterance(tokenize(query)[:MAX_NUM_TOKENS]), self.max_encoder_seq_length)
+            query = pad_tokens(wrap_utterance(tokenize(query.lower())[:MAX_NUM_TOKENS]), self.max_encoder_seq_length)
 
         input_sequence = np.zeros((1, self.max_encoder_seq_length, self.num_encoder_tokens), dtype='float32')
 
@@ -190,7 +190,7 @@ class Chatbot():
             if word == END_UTTERANCE or len(output) >= self.max_decoder_seq_length:
                 break
 
-            if word != START_UTTERANCE and word != END_UTTERANCE:
+            if word != START_UTTERANCE and word != END_UTTERANCE and word != PAD_TOKEN:
                 output.append(word)
 
             target_sequence = np.zeros((1, 1, self.num_decoder_tokens))

@@ -13,7 +13,7 @@ MAX_NUM_UTTERANCES = os.getenv('MAX_NUM_UTTERANCES', 25)
 
 # The maximum number of words which are considered. This value
 # is the number of most common words which get included in embedding.
-MAX_VOCABULARY_SIZE = os.getenv('MAX_VOCABULARY_SIZE', 1000)
+MAX_VOCABULARY_SIZE = os.getenv('MAX_VOCABULARY_SIZE', 3000)
 
 # If specifified, only tweets from this user name will be used as replies.
 TARGET_USER = os.getenv('TARGET_USER', None)
@@ -31,17 +31,22 @@ UNKNOWN_TOKEN = '<unk>'
 PAD_TOKEN = '<pad>'
 
 
-def clean_content(content):
+def clean_content(content, decode_content=True):
     ''' Cleans the text belonging to a content in the Facebook data. '''
-    # Facebook encodes the data in their exports incorrectly. We can work around
-    # this error by encoding the data as Latin-1 and decoding again as UTF-8.
-    content = content.encode('latin1').decode('utf8')
+    if decode_content:
+        # Facebook encodes the data in their exports incorrectly. We can work around
+        # this error by encoding the data as Latin-1 and decoding again as UTF-8.
+        content = content.encode('latin1').decode('utf8')
+
     # Convert all text to lowercase.
     content = content.lower()
+
     # Remove all punctuation from text.
     content = re.sub('[{}]'.format(re.escape(string.punctuation)), '', content)
+
     # Replace newlines with spaces.
     content = re.sub('\n', ' ', content)
+
     # Return the cleaned content.
     return content
 
@@ -78,7 +83,10 @@ def get_cornell_utterance_pairs():
 
     with open('corpus/cornell/movie_lines.txt', encoding='latin-1') as f:
         # Read utterances from Cornell corpus file.
-        lines = [line.split('+++$+++')[-1].strip() for line in f.readlines()][:MAX_NUM_UTTERANCES]
+        lines = [
+            clean_content(line.split('+++$+++')[-1].strip(), decode_content=False)
+            for line in f.readlines()
+        ][:MAX_NUM_UTTERANCES]
 
     for i, utterance in enumerate(lines[1:], 1):
         # Tokenize input and target utterances.
@@ -232,3 +240,30 @@ class TokenMapper():
             self.tok2num[token] = len(self.num2tok)
             self.num2tok[len(self.num2tok)] = token
 
+
+def analyze_facebook_corpus():
+    ''' todo '''
+    # Load input and target utterances.
+    input_utterances, target_utterances = get_utterance_pairs()
+
+    # Merge first input utterance with time-shifted target
+    # utterances, to get a list with all utterances.
+    merged_utterances = [input_utterances[0]] + target_utterances
+
+    token_mapper = TokenMapper(merged_utterances)
+
+    # Vectorize utterances.
+    mapped_utterances = [
+        [token_mapper.tok2num[token] for token in utterance]
+        for utterance in merged_utterances
+    ]
+
+    # Count occurrences of each token in dataset.
+    token_counts = collections.Counter(token for tokens in mapped_utterances for token in tokens)
+
+    print('Percentage of unknown tokens', token_counts[token_mapper.tok2num[UNKNOWN_TOKEN]] / sum(token_counts.values()))
+
+    print('Average length of utterance', sum(len(utterance) for utterance in mapped_utterances) / len(mapped_utterances))
+
+    print('Percentage of utterances over MAX_NUM_TOKENS',
+          sum(1 for utterance in mapped_utterances if len(utterance) > MAX_NUM_TOKENS) / len(mapped_utterances))

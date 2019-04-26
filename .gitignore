@@ -6,8 +6,12 @@ corpus
 *.aux
 *.fdb_latexmk
 *.fls
-*.pdf
 *.gz
+*.bbl
+*.bcf
+*.blg
+*.xml
+*.dvi
 
 # Model files
 *.h5
