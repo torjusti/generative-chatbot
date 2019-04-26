@@ -162,7 +162,7 @@ mimic natural human language.
 With appropriate additions to encoder-decoder models such models are able to
 produce comparable results to state of the art phrase-based systems for machine
 translation, as shown by Bahdanau, Cho \& Bengio in their paper on the attention
-mechanism \cite{Bahdanau2015}. It is likely that attention mechaisms also can
+mechanism \cite{Bahdanau2015}. It is likely that attention mechanisms also can
 provide better results for chatbots.
 \todo{Can we find a source for this?}
 
@@ -173,6 +173,14 @@ utilises Gated Recurrent Units (GRU) with a three-dimensional sequence
 embedding. The architecture has been extended with Bahdanau Attention, allowing
 for the decoder inputs to consider a \textit{context} vector instead of the
 entire encoder output.
+\todo{I propose the paragraph in the source code, because three dimensional
+sequence embedding doesnt really mean much. Also, I think we should consider
+moving this paragraph out of this section.}
+%The model in this project is implementing using TensorFlow, a machine learning
+%framework by Google, with Keras as a high-level wrapper. The architecture is 
+%a sequence-to-sequence model which utilises Gated Recurrent Units. The model
+%has also been extended with Bahdanau attention, allowing for the decoder inputs
+%to consider a concext vector instead of the entire encoder output.
 
 \paragraph{}
 This architecture can be further developed using a word-level embedding system
@@ -201,8 +209,8 @@ containing several hundred thousands or even millions of messages. This project
 combines the utterances of two Facebook users, ending in a corpus with more
 than 110 000 utterance pairs. However, processing such a dataset has proven a
 challenge. With a maximum sequence length $max\_seq\_length$ of $20$, a
-vocabulary size $vocab\_s$ of $5000$ and $110,000$ utterances stored in a 32-bit
-float format, storing it requires
+vocabulary size $vocab\_s$ of $5000$ and $110 000$ utterances stored in a
+32-bit float format, storing it requires
 
 \begin{align*}
   max\_seq\_length &\times vocab\_s \times 110,000 \times 32 \\
@@ -211,7 +219,8 @@ float format, storing it requires
 \end{align*}
 
 of memory. During this project, only 32GB of memory was available at a
-time, and so the usable corpus was reduced to a tenth: 10,000 utterances.
+time, and so the usable corpus was reduced to 10 000 utterances, a tenth
+of the original corpus size.
 
 \paragraph{}
 In addition to using personal Facebook Messenger data, the Cornell Movie
@@ -239,6 +248,8 @@ the attention mechanism, all three are trained together. This model has proven
 very effective for neural machine translation and other tasks as well. An early
 description of this architecture is available in \cite{Cho2014} and
 \cite{Bahdanau2015}.
+\todo{Maybe output vector -> final encoder state, instead of output = thought vector?
+Check this paragrah out.}
 
 \paragraph{}
 The rest of this section is dedicated to describing the architecture of
@@ -386,12 +397,13 @@ In this model, the encoder GRU is fed one-hot encoded utterances one at a
 time. Recall that the purpose of this step is to create a compact, internal
 representation of the input utterance - a thought vector, so to speak. The
 encoder GRU outputs a list containing outputs from the encoder as well as the
-internal encoder state. The decoder GRU giscards the GRU output but uses the
-final hidden encoder state as its own initial state, so that the decoer also
+internal encoder state. The decoder GRU discards the GRU output but uses the
+final hidden encoder state as its own initial state, so that the decoder also
 has information about the input utterance. As input, the decoder activation
 layer is fed a concatenation of the decoder GRU outputs and the attention layer
 outputs. Note that the attention layer output is a function of the encoder
-outputs and the decoder GRU outputs. 
+outputs and the decoder GRU outputs.
+\todo{For these two paragraphs, check state vs output?}
 
 \begin{center}
   \begin{figure}[hbt]
@@ -436,7 +448,7 @@ used as the initial state for the decoder, just as in the training phase.
 Recall that only the decoder GRU uses the hidden encoder state. The dense
 activation layer of the GRU that actually makes the prediction, uses the
 context state given by the attention layer. We then run the decoder, using the
-special \emph{<BOS>} token as the input.  This yields the initial token of the
+special \emph{<BOS>} token as the input. This yields the initial token of the
 response utterance. The system then feeds this token back into the decoder and
 uses it to generate the next token in the utterance. At each step in this
 process, the system picks the most likely token. This process halts when the
