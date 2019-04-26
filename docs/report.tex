@@ -372,12 +372,29 @@ attention implemented using Keras, which is illustrated in figure
 \ref{fig:keras-model}. Keras and TensorFlow does not natively support
 attention resulting in using a custom implementation of an attention layer
 \cite{keras-attention} that has been heavily modified to fit into the rest of
-the Keras model.  The encoder consists of an input layer, another layer with
-dropout and a GRU layer which feeds into the decoder. The decoder is structured
-similarly, consisting of an input layer, a dropout layer, a decoder dropout
-layer and a dense layer as the last layer of the model. We use a dropout factor
-of 0.2.
-\todo{Add attention once we have the output image}
+the Keras model.  
+
+\paragraph{}
+The encoder consists of an input layer with dropout and a GRU
+layer which feeds its hidden states into the decoder GRU and its outputs into 
+the attention layer. The decoder consists of an input layer with dropout that
+feeds the decoder GRU alongside the encoder GRU hidden state. The decoder GRU
+outputs is also fed into the attention layer. The attention layer takes in, as
+mentioned, the encoder and decoder outputs. The decoder outputs and the
+attention outputs are then concatenated and fed into the activation function of
+the decoder, which actually makes a prediction.
+
+\paragraph{}
+In this model, the encoder GRU is fed one-hot encoded utterances one at a
+time. Recall that the purpose of this step is to create a compact, internal
+representation of the input utterance - a thought vector, so to speak. The
+encoder GRU outputs a list containing outputs from the encoder as well as the
+internal encoder state. The decoder GRU giscards the GRU output but uses the
+final hidden encoder state as its own initial state, so that the decoer also
+has information about the input utterance. As input, the decoder activation
+layer is fed a concatenation of the decoder GRU outputs and the attention layer
+outputs. Note that the attention layer output is a function of the encoder
+outputs and the decoder GRU outputs. 
 
 \begin{center}
   \begin{figure}[hbt]
@@ -391,20 +408,6 @@ of 0.2.
     \label{fig:keras-model}
   \end{figure}
 \end{center}
-
-\todo{Update model with attention.}
-In this model, the encoder GRU is fed one-hot encoded utterances one at a
-time. Recall that the purpose of this step is to create a compact, internal
-representation of the input utterance - a thought vector, so to speak. The
-encoder GRU outputs a list containing outputs from the encoder as well as the
-internal encoder state. The decoder GRU giscards the GRU output but uses the
-final hidden encoder state as its own initial state, so that the decoer also
-has information about the input utterance. As input, the decoder activation
-layer is fed a concatenation of the decoder GRU outputs and the attention layer
-outputs. Note that the attention layer output is a function of the encoder
-outputs and the decoder GRU outputs. 
-
-\paragraph{}
 During training the decoder is fed the target sequence - that is, the target
 utterance. As a target for the output, the decoder is fed the same target utterance, shifted to the right by one.
 This is a training method which is known as teacher forcing
@@ -448,8 +451,6 @@ picked is always just the most likely token. However, this basic scheme does
 not always yield the most likely \emph{utterance}. Future work might explore
 alternative inference schemes based on algorithms such as beam search, which
 seek to maximize the probability for the entire output utterance.
-
-\subsection*{}
 
 % Architecture \ Experimental Setup + Teacher forcing Future work: Bert/custom
 % embeddings, embedding layer, bidirectional model, beam search
