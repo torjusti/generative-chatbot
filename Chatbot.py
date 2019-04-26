@@ -1,6 +1,9 @@
-from keras.models import Model
-from keras.layers import Dense, LSTM, CuDNNLSTM, Input, Embedding, TimeDistributed, Flatten, Dropout
+import tensorflow as tf
+from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, GRU, Input, TimeDistributed, Dropout, Concatenate
 from collections import defaultdict
+from attention_keras.layers.attention import AttentionLayer
 import numpy as np
 import os
 
@@ -81,31 +84,43 @@ class Chatbot():
 
     def __build_model(self):
         ''' Construct the model used to train the chatbot. '''
-        encoder_inputs = Input(shape=(None, self.num_encoder_tokens), name='encoder_input')
+        encoder_inputs = Input(shape=(self.max_encoder_seq_length, self.num_encoder_tokens), name='encoder_input')
         encoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='encoder_dropout')))(encoder_inputs)
-        encoder = CuDNNLSTM(LATENT_DIM, return_state=True, name='encoder_lstm')
+        encoder = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='encoder_gru')
 
-        encoder_outputs, state_h, state_c = encoder(encoder_dropout)
-        encoder_states = [state_h, state_c]
+        encoder_outputs, encoder_state = encoder(encoder_dropout)
 
-        decoder_inputs = Input(shape=(None, self.num_decoder_tokens), name='decoder_input')
+        decoder_inputs = Input(shape=(self.max_decoder_seq_length, self.num_decoder_tokens), name='decoder_input')
         decoder_dropout = (TimeDistributed(Dropout(rate=DROPOUT_RATE, name='decoder_dropout')))(decoder_inputs)
-        decoder_lstm = CuDNNLSTM(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_lstm')
-        decoder_outputs, _, _ = decoder_lstm(decoder_dropout, initial_state=encoder_states)
+
+        decoder_gru = GRU(LATENT_DIM, return_sequences=True, return_state=True, name='decoder_gru')
+        decoder_outputs, _ = decoder_gru(decoder_dropout, initial_state=encoder_state)
+
+        # Attention mechanism
+        attn_layer = AttentionLayer(name='attention_layer')
+        attn_out, attn_states = attn_layer([encoder_outputs, decoder_outputs])
+        decoder_outputs = Concatenate(axis=-1, name='concat_layer')([decoder_outputs, attn_out])
+
         decoder_dense = Dense(self.num_decoder_tokens, activation='softmax', name='decoder_activation_softmax')
-        decoder_outputs = decoder_dense(decoder_outputs)
+        decoder_outputs = TimeDistributed(decoder_dense, name='time_distributed_layer')(decoder_outputs)
 
-        self.model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
-
+        self.model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=[decoder_outputs])
         self.model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+        self.model.summary()
 
-        self.encoder_model = Model(encoder_inputs, encoder_states)
+        self.encoder_model = Model(inputs=encoder_inputs, outputs=[encoder_outputs, encoder_state])
 
-        decoder_states_inputs = [Input(shape=(LATENT_DIM,)), Input(shape=(LATENT_DIM,))]
-        decoder_outputs, state_h, state_c = decoder_lstm(decoder_inputs, initial_state=decoder_states_inputs)
-        decoder_outputs = decoder_dense(decoder_outputs)
+        decoder_inf_inputs = Input(batch_shape=(None, 1, self.num_decoder_tokens), name='decoder_word_inputs')
+        encoder_inf_states = Input(batch_shape=(None, self.max_encoder_seq_length, LATENT_DIM), name='encoder_inf_states')
+        decoder_init_state = Input(batch_shape=(None, LATENT_DIM), name='decoder_init')
 
-        self.decoder_model = Model([decoder_inputs] + decoder_states_inputs, [decoder_outputs] + [state_h, state_c])
+        decoder_outputs, decoder_state = decoder_gru(decoder_inf_inputs, initial_state=decoder_init_state)
+        attn_out, attn_states = attn_layer([encoder_inf_states, decoder_outputs])
+        decoder_outputs = Concatenate(axis=-1, name='concat')([decoder_outputs, attn_out])
+        decoder_outputs = TimeDistributed(decoder_dense)(decoder_outputs)
+
+        self.decoder_model = Model(inputs=[encoder_inf_states, decoder_init_state, decoder_inf_inputs], 
+                                   outputs=[decoder_outputs, attn_states, decoder_state])
 
 
     def __train(self):
@@ -155,7 +170,8 @@ class Chatbot():
             input_sequence[0, i, self.target_mapper.tok2num[token]] = 1
 
         # Get decoder inputs/encoder outputs
-        states = self.encoder_model.predict(input_sequence)
+        enc_out, enc_state = self.encoder_model.predict(input_sequence)
+        dec_state = enc_state
 
         # Setup decoder inputs
         target_sequence = np.zeros((1, 1, self.num_decoder_tokens))
@@ -167,7 +183,7 @@ class Chatbot():
 
         while True:
             # Predict output.
-            output_tokens, state_h, state_c = self.decoder_model.predict([target_sequence] + states)
+            output_tokens, attention, dec_state = self.decoder_model.predict([enc_out, dec_state, target_sequence])
             sample = np.argmax(output_tokens[0, -1, :])
             word = self.target_mapper.num2tok[sample]
 
@@ -180,8 +196,6 @@ class Chatbot():
             target_sequence = np.zeros((1, 1, self.num_decoder_tokens))
 
             target_sequence[0, 0, sample] = 1
-
-            states = [state_h, state_c]
 
         return ' '.join(output)
 
