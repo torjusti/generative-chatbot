@@ -137,13 +137,13 @@ to compare the models with each other.
 
 \paragraph{}
 One of the prerequisites for a language generation system such as a chatbot is
-data in the language being generated. The langauge generation process greatly
-depends on the amount and qualtity of the available data. In this project, we
+data in the language being generated. The language generation process greatly
+depends on the amount and quality of the available data. In this project, we
 perform comparisons using similar data conditions for both English and Norwegian,
 in order to establish the effectiveness of the \emph{model} for Norwegian. We
 trained an English chatbot using a subset of a corpus commonly used for English
 chatbots, in order to compare the effectiveness of the model between English
-and Norwegian for similarly sizd datasets. A discussion of the data used in this
+and Norwegian for similarly size datasets. A discussion of the data used in this
 project follows in the next section.
 
 \paragraph{}
@@ -158,7 +158,7 @@ not able to apply any real logic to their answers, they are certainly able to
 mimic natural human language.
 
 \paragraph{}
-With appropriate additions to encoder-decoder models such models are able to
+With appropriate additions to encoder-decoder models, such models are able to
 produce comparable results to state of the art phrase-based systems for machine
 translation, as shown by Bahdanau, Cho \& Bengio in their paper on the attention
 mechanism \cite{Bahdanau2015}. It is likely that attention mechanisms also can
@@ -202,7 +202,7 @@ containing several hundred thousands or even millions of messages. This project
 combines the utterances of two Facebook users, ending in a corpus with more
 than $110, 000$ utterance pairs. However, processing such a dataset has proven a
 challenge. With a maximum sequence length $max\_seq\_length$ of $20$, a
-vocabulary size $vocab\_s$ of $5000$ and $110, 000$ utterances stored in a
+vocabulary size, $vocab\_s$, of $5000$ and $110, 000$ utterances stored in a
 32-bit float format, storing it requires
 
 \begin{align*}
@@ -277,8 +277,8 @@ This is required to reduce the size of the input matrices for the model, due
 to limited available computational power. However, an analysis of the dataset
 shows that only about 4\% of the utterances are above this limit. Similarly,
 we limit the number of words which may appear in the input and target data.
-This vocabulary size only includes the most common 3000 words. In accordance
-with Zipf's law, 3000 words account for slightly under 80\% of the total
+This vocabulary size only includes the most common 3,000 words. In accordance
+with Zipf's law, 3,000 words account for slightly under 80\% of the total
 vocabulary. While this might reduce the quality of the output due to certain
 parts of the output sentences being omitted, it is crucial that the size of
 the input vectors are minimized.
