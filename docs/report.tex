@@ -356,8 +356,9 @@ using Keras, which is illustrated in figure \ref{fig:keras-model}. The encoder
 consists of an input layer, another layer with dropout and an LSTM layer which
 feeds into the decoder. The decoder is structured similarly, consisting of an
 input layer, a dropout layer, a decoder dropout layer and a dense layer as the
-last layer of the model.
+last layer of the model. We use a dropout factor of 0.2.
 \todo{Attention.}
+\todo{Is dropout factor the correct term?}
 
 \begin{center}
   \begin{figure}[hbt]
@@ -388,7 +389,11 @@ token $n$ in the utterance, given token $n-1$ as input. The alternative to
 teacher forcing is to feed the decoder prediction back into the decoder output,
 instead of always using the ground truth as the decoder input. However, not
 using teacher forcing generally makes training slower and the model unstable.
-\todo{Object oriented system. Explain LSTM nodes. How we fit the model. Epochs, batches.}
+
+For training, we use the built-in Keras training functionality. We use the
+\emph{rmsprop} optimizer and \emph{categorical crossentropy} as the loss
+function. All models were trained for between 200 and 300 epochs, depending
+on the size of the dataset. We used a batch size of 64.
 
 \subsection*{Inference}
 
