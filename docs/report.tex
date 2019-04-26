@@ -64,6 +64,7 @@ techniques indeed can be applied to create chatbots in both Norwegian as
 well as English, as long as enough training data of a sufficiently high
 quality is available. However, we stress that in many cases such training
 data in Norwegian can be hard to obtain.
+\todo{Snik inn attention.}
 
 \end{abstract}
 
@@ -73,7 +74,7 @@ data in Norwegian can be hard to obtain.
 A chatbot is a computer system which can interact with a user through natural
 language. Because humans tend to prefer more human-like interfaces, chatbots
 can be very useful in applications such as customer support, education, and
-personal productivity systems like Google Assistant.  This project concerns
+personal productivity systems like Google Assistant. This project concerns
 such chatbots which converse specifically using the Norwegian language.
 
 \paragraph{}
@@ -94,6 +95,7 @@ translation, but they have also proven effective in the field of chatbots.
 Therefore, the main objective of this project is to implement a simple Norwegian
 chatbot using a sequence-to-sequence model, which for example could be used as
 a small talk module in another mode domain-specific chatbot.
+\todo{Kanskje snik inn attention.}
 
 \paragraph{}
 We differ between retrieval-based and generative chatbots. A retrieval-based
@@ -139,14 +141,21 @@ chatbot model. We then train this model using both Norwegian and English data
 in order to compare the effectiveness of the model for Norwegian in comparison
 with English. The method of choice in this projet was a simple
 sequence-to-sequence model, as proposed by Cho et al. in their paper
-\cite{Cho2014}.
+\cite{Cho2014}. In order to compare the Norwegian and English models, we
+provide our observations of the models performance as well as user
+evaluations of the systems, where we have gotten a set of people to compare
+the models with each other.
+\todo{Snik inn attention.}
 
 \paragraph{}
 One of the prerequisites for a language generation system such as a chatbot is
 data in the language being generated. The langauge generation greatly depends
 on the amount and qualtity of the available data. In this project, we perform
-comparisons using similar conditions for both English and Norwegian, in order
-to establish the effectiveness of the \emph{model} for the Norwegian language.
+comparisons using similar data conditions for both English and Norwegian, in
+order to establish the effectiveness of the \emph{model} for Norwegian. A
+discussion of the data used in this project follows in the next section.
+\todo{Implemented baseline model using full Cornell corpus.
+Then checked effectiveness in Norwegian by training two small models.}
 
 \paragraph{}
 Sequence-to-sequence models have proven to be an excellent baseline for
@@ -158,6 +167,7 @@ sufficiently large corpus for such example-based ``translation'' have been
 shown to produce promising results \cite{Ezquerra2018}. Although these bot are
 not able to apply any real logic to their answers, they are certainly able to
 mimic natural human language.
+\todo{Attention her og, kanskje.}
 
 \paragraph{}
 The model in this project utilises Google's Machine Learning framework
@@ -167,7 +177,7 @@ three-dimensional sequence embedding. This architecture can be further
 developed using a word-level embedding system such as \textit{Word2Vec}
 \cite{word2vec} and sequence-level context like the Bahdanau attention
 mechanism \cite{Bahdanau2015}.
-\todo{Rewrite slightly. BERT rather than word2vec, and I still don't understand this context shit tbh :'(}
+\todo{Rewrite. Remove attention. BERT.}
 
 \section*{Data}
 Norwegian chatbot training data is not readily available, but relevant corpora
@@ -190,9 +200,7 @@ course of a few years. More avid users of the platform can have chat logs
 containing several hundred thousands or even millions of messages. This project
 combines the utterances of two Facebook users, ending in a corpus with more
 than 110,000 utterance pairs.
-\todo{vil vi ha med noe om challenges mtp at svar kan variere veldig fra person
-til person? svar: ja}
-\todo{want to use norwegian chat data to verify...}
+\todo{Challenges arising from very varying data from person to person.}
 
 \paragraph{}
 In addition to using personal Facebook Messenger data, the Cornell Movie
@@ -200,9 +208,7 @@ Dialogs Corpus \cite{cornell-corpus} has been used for model evaluation. The
 Cornell corpus consists of several hundred thousands of utterances from movie
 scripts that are freely available. This corpus is frequently highlighted in
 chatbot models as a high-quality data set.
-\todo{difficulties with chatbot data. want to check if it is possible
-to use real }
-\todo{used this dataset for cross-checking}
+\todo{We used this dataset to compare Norwegian and English.}
 
 \section*{Implementation}
 Chatbots which utilise deep learning are usually based on sequence to sequence
@@ -220,6 +226,7 @@ network is dependent on the output of the encoder network, both networks are
 trained together. This simple model has proven very effective for neural
 machine translation and other tasks as well. An early description of this
 architecture is available in \cite{Cho2014}.
+\todo{Mention attention here as well.}
 
 \paragraph{}
 The rest of this section is dedicated to describing the architecture of
@@ -263,7 +270,6 @@ parts of the output sentences being omitted, it is crucial that the size of
 the input vectors are minimized.
 
 \subsection*{Feature extraction}
-\todo{Is feature extraction the correct term?}
 The preprocessing system also provides a way of encoding utterances as
 vectors, a process known as word embedding. This is done by simply
 encoding each token as a unique number, with additional logic for handling
@@ -353,6 +359,7 @@ consists of an input layer, another layer with dropout and an LSTM layer which
 feeds into the decoder. The decoder is structured similarly, consisting of an
 input layer, a dropout layer, a decoder dropout layer and a dense layer as the
 last layer of the model.
+\todo{Attention.}
 
 \begin{center}
   \begin{figure}[hbt]
@@ -366,6 +373,7 @@ last layer of the model.
     \label{fig:keras-model}
   \end{figure}
 \end{center}
+\todo{Update model with attention.}
 
 In this model, the encoder LSTM is fed one-hot encoded utterances one at a
 time. Recall that the purpose of this step is to create a compact, internal
@@ -382,7 +390,6 @@ token $n$ in the utterance, given token $n-1$ as input. The alternative to
 teacher forcing is to feed the decoder prediction back into the decoder output,
 instead of always using the ground truth as the decoder input. However, not
 using teacher forcing generally makes training slower and the model unstable.
-\todo{I don't really understand this stuff thoroughly. Triple check solidness, elaborate more.}
 \todo{Object oriented system. Explain LSTM nodes. How we fit the model. Epochs, batches.}
 
 \subsection*{Inference}
@@ -404,7 +411,7 @@ token back into the decoder and uses it to generate the next token in the
 utterance. At each step in this process, the system picks the most likely
 token. This process halts when the special \emph{<EOS>} token is generated,
 at which point the response utterance is returned to the user.
-\todo{Might want to discuss the stated stored at each step, but I don't really know enough about that stuff to write about it.}
+\todo{Might want to discuss the stated stored at each step.}
 
 \paragraph{}
 The inference system just described is a greedy decoding scheme, as the token
@@ -425,9 +432,10 @@ answer from a list of answers belonging to the intent. Such systems require a
 fair amount of manual training and lack the ability to independently formulate
 an answer independently, based only on the question.  In this report, we
 describe a generative chatbot which is based on an unsupervised model.
+\todo{Elaborate more in this section.}
 
 \section*{Results}
-
+\todo{Write.}
 % Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine.
 % Analysedelen av oppgaven blir ofte kalt resultater, slik som i
 % IMRoD-modellen.  I kvantitative studier vil du kanskje i tillegg til å
@@ -437,6 +445,7 @@ describe a generative chatbot which is based on an unsupervised model.
 % i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
 
 \section*{Discussion / Evaluation}
+\todo{Write.}
 
 % Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å
 % drøfte vil si å: sette ulike synspunkter, momenter, argumenter, faktorer og
@@ -453,6 +462,7 @@ describe a generative chatbot which is based on an unsupervised model.
 % simple model
 
 \section*{Conclusion}
+\todo{Write.}
 
 % Om avslutningen din skal være en konklusjon eller en oppsummering, avhenger
 % av problemstillingen din. En konklusjon skal svare på problemstillingen, mens
