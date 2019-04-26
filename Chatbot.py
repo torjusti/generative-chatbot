@@ -106,6 +106,7 @@ class Chatbot():
 
         self.model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=[decoder_outputs])
         self.model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+        self.model.summary()
 
         self.encoder_model = Model(inputs=encoder_inputs, outputs=[encoder_outputs, encoder_state])
 
