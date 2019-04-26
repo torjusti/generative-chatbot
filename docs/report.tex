@@ -631,7 +631,7 @@ However, the scores are relatively low, which might be due to high expecations
 from the evaluators. The evaluators were often attempting to converse within
 a large range of topics which will yield poorer results when considering the
 very small size of the datasets used to train the two models. Since the
-Norwegian model is comparable to the English model trained on the reduced
+Norwegian model is comparable to the English model when trained on the reduced
 dataset, we believe another Norwegian model trained on a larger data set would
 compare to an English model trained on the full-size dataset.
 
@@ -647,7 +647,22 @@ compare to an English model trained on the full-size dataset.
 % burde blitt studert ytterligere? Slik tar du utgangspunkt i ditt eget
 % prosjekt og peker på mulighet for oppfølging.
 
-\todo{Conversation data in appendix.}
+In this report, we presented a generative chatbot using a
+sequence-to-sequence model with attention. We train the chatbot using both
+Norwegian and English datasets of comparable size, in order to establish that
+methods which are used to create English chatbots also apply for the Norwegian
+language.
+
+\paragraph{}
+We conclude that sequence-to-sequence models can be used for Norwegian chatbot
+systems with comparable effectiveness to that of English. It seems likely that
+language is not the defining factor for such models, but rather data. It makes
+sense that such models can adapt to multiple languages easily, especially
+given their wide-spread usage in neural machine translation. Furthermore, it
+is likely that with a much larger amount of data, this model could be
+comparable to a baseline English model trained on the full-size Cornell
+dataset. The effectivenss of the model may further be improved by using
+mechanisms such as beam search, and through employing systems such as BERT.
 
 \printbibliography
 
