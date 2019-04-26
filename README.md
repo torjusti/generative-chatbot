@@ -1,6 +1,7 @@
 # generative-chatbot
 
-Generative chatbot project created during the course TDT4310.
+Generative chatbot project created during the course TDT4310,
+by Torjus Iveland and Vegar Andreas Bergum.
 
 ## Environment variables
 
