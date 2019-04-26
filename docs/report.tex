@@ -175,12 +175,10 @@ The model in this project is implemented using TensorFlow, a machine learning
 framework by Google, with Keras as a high-level wrapper. The architecture is 
 a sequence-to-sequence model which utilises Gated Recurrent Units. The model
 has also been extended with Bahdanau attention, allowing for the decoder inputs
-to consider a concext vector instead of the entire encoder output.
-
-\paragraph{}
-This architecture can be further developed using a word-level embedding system
-such as \textit{Word2Vec} \cite{word2vec}, or by incorporating a system such
-as BERT \cite{bert2018}.
+to consider a concext vector instead of the entire encoder output. This
+architecture can be further developed using a word-level embedding system such
+as \textit{Word2Vec} \cite{word2vec}, or by incorporating a system such as
+BERT \cite{bert2018}.
 
 \section*{Data}
 Norwegian chatbot training data is not readily available, but relevant corpora
@@ -202,9 +200,9 @@ easily be able to generate several tens of thousands of utterances over the
 course of a few years. More avid users of the platform can have chat logs
 containing several hundred thousands or even millions of messages. This project
 combines the utterances of two Facebook users, ending in a corpus with more
-than 110 000 utterance pairs. However, processing such a dataset has proven a
+than $110, 000$ utterance pairs. However, processing such a dataset has proven a
 challenge. With a maximum sequence length $max\_seq\_length$ of $20$, a
-vocabulary size $vocab\_s$ of $5000$ and $110 000$ utterances stored in a
+vocabulary size $vocab\_s$ of $5000$ and $110, 000$ utterances stored in a
 32-bit float format, storing it requires
 
 \begin{align*}
@@ -214,7 +212,7 @@ vocabulary size $vocab\_s$ of $5000$ and $110 000$ utterances stored in a
 \end{align*}
 
 of memory. During this project, only 32GB of memory was available at a
-time, and so the usable corpus was reduced to 10 000 utterances, a tenth
+time, and so the usable corpus was reduced to $10, 000$ utterances, a tenth
 of the original corpus size.
 
 \paragraph{}
@@ -419,6 +417,7 @@ teacher forcing is to feed the decoder prediction back into the decoder output,
 instead of always using the ground truth as the decoder input. However, not
 using teacher forcing generally makes training slower and the model unstable.
 
+\paragraph{}
 For training, we use the built-in Keras training functionality. We use the
 \emph{rmsprop} optimizer and \emph{categorical crossentropy} as the loss
 function. All models were trained for between 200 and 300 epochs, depending
@@ -459,7 +458,7 @@ seek to maximize the probability for the entire output utterance.
 
 \section*{Related Work}
 Multiple Norwegian chatbots already exist. However, these are usually systems
-which first map the user query to a predefined intent, and then retrieve an
+which first map the user query to a predefined intent, and then retrieves an
 answer from a list of answers belonging to the intent. Such systems require a
 fair amount of manual training and lack the ability to independently formulate
 an answer independently, based only on the question. In this report, we
@@ -486,11 +485,11 @@ correction.
 The training phase of a chatbot is difficult. The calculated loss during
 training is not a good metric since there is no good objective measure of how
 good a response is. Although, after 300 epochs of training on datasets of
-10,000 utterances the model converged at a loss of ~0.1, using the
-\textit{categorical crossentropy} function.
+$10, 000$ utterances the model converged at a loss of  approximately 0.1, using
+the \textit{categorical crossentropy} function.
 
 \paragraph{}
-Once the model was fully trained, supervised human evaluation would be used to
+Once the model was fully trained, supervised human evaluation was be used to
 establish a score. This was done by attempting to converse with the chatbot. 
 This project is concerned with Norwegian chatbots. In order to establish a
 baseline for comparison the same model was trained with the same amount of data
@@ -669,7 +668,7 @@ sense that such models can adapt to multiple languages easily, especially
 given their wide-spread usage in neural machine translation. Furthermore, it
 is likely that with a much larger amount of data, this model could be
 comparable to a baseline English model trained on the full-size Cornell
-dataset. The effectivenss of the model may further be improved by using
+dataset. The effectiveness of the model may further be improved by using
 mechanisms such as beam search, and through employing systems such as BERT.
 
 \printbibliography
