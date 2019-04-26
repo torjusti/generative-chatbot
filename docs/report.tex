@@ -156,7 +156,6 @@ sufficiently large corpus for such example-based ``translation'' have been
 shown to produce promising results \cite{Ezquerra2018}. Although these bots are
 not able to apply any real logic to their answers, they are certainly able to
 mimic natural human language.
-\todo{Something about our reduced dataset.}
 
 \paragraph{}
 With appropriate additions to encoder-decoder models such models are able to
@@ -164,7 +163,6 @@ produce comparable results to state of the art phrase-based systems for machine
 translation, as shown by Bahdanau, Cho \& Bengio in their paper on the attention
 mechanism \cite{Bahdanau2015}. It is likely that attention mechaisms also can
 provide better results for chatbots.
-\todo{Can we find a source for this?}
 
 \paragraph{}
 The model in this project utilises Google's Machine Learning framework
@@ -463,7 +461,6 @@ describe a generative chatbot which is based on an unsupervised model.
 \todo{Elaborate more in this section.}
 
 \section*{Results}
-\todo{Write.}
 % Å analysere gjør du ved å redegjøre, forklare og vurdere funnene dine.
 % Analysedelen av oppgaven blir ofte kalt resultater, slik som i
 % IMRoD-modellen.  I kvantitative studier vil du kanskje i tillegg til å
@@ -471,6 +468,21 @@ describe a generative chatbot which is based on an unsupervised model.
 % oversikt og innsikt i hva du har gjort.  I empirisk baserte studier vil
 % analysene handle om å beskrive og tolke. Mange vil ofte drøfte enkeltfunnene
 % i dette kapitlet og ta for seg mer overordnede funn i drøftingskapitlet.
+
+The training phase of a chatbot is difficult. The calculated loss during
+training is not a good metric since there is no good objective measure of how
+good a response is. Although, after 300 epochs of training on datasets of
+10,000 utterances the model converged at a loss of ~0.1, using the
+\textit{categorical crossentropy} function.
+
+\paragraph{}
+Once the model was fully trained, supervised human evaluation would be used to
+establish a score. This was done by attempting to converse with the chatbot. 
+This project is concerned with Norwegian chatbots. In order to establish a
+baseline for comparison the same model was trained with the same amount of data
+from the Cornell Movie Dialog dataset \cite{cornell-corpus}. The results of the
+conversations are found in table 2 and 3 for the Norwegian and English versions
+respectively.
 
 \begin{table}[hbt!]
 \centering
@@ -554,6 +566,38 @@ describe a generative chatbot which is based on an unsupervised model.
 \caption{English logs}
 \end{table}
 
+\paragraph{}
+From the logs it is clear that the chatbot is able to respond in a natural way
+to some utterances. The conversation is not necessarily coherent due to the
+lack of context, but rather a single focus on the last utterance. The bot is
+able to construct some valid sentences, but the lack of a defined grammar or
+rules makes it subject to sentence generation that is invalid.
+From the limited conversational data it becomes clear that the Norwegian
+version is comparable to the English version, if not slightly better.
+
+\section*{Discussion / Evaluation}
+% Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å
+% drøfte vil si å: sette ulike synspunkter, momenter, argumenter, faktorer og
+% årsaker opp mot hverandre vurdere og sette dem opp mot hadily available, this
+% is one of the primary challenges.  + Facebook Messenger data dump.  +
+% Clarino: Tried, but restrictive licenses.  + Movie scripts. Copyright
+% unclear.
+
+% heavily biased dataset bad training data, not so much training data simple
+% model
+
+% heavily biased dataset
+% bad training data, not so much training data
+% simple model
+
+In order to get a better view of the performance of the model, a few human
+evaluators were given access to each version of the chatbot. The evaluators
+were told that they are conversing with a small-talk chatbot, and were given
+instructions to talk to them. Once they had conversed the with bots for a few
+minutes, they were asked to rank the bots on a scale from 0 to 10, where 0
+is equivalent to having a monologue while 10 is the equivalent to conversing
+with a human being. The resulting scores are found in table 4.
+
 \begin{table}[hbt!]
     \centering
     \begin{tabular}{|c|c|}
@@ -574,26 +618,15 @@ describe a generative chatbot which is based on an unsupervised model.
     \label{tab:evaluation-results}
 \end{table}
 
-\section*{Discussion / Evaluation}
-\todo{Write.}
-
-% Du skal her drøfte resultatene dine og sette dem inn i en sammenheng. Å
-% drøfte vil si å: sette ulike synspunkter, momenter, argumenter, faktorer og
-% årsaker opp mot hverandre vurdere og sette dem opp mot hadily available, this
-% is one of the primary challenges.  + Facebook Messenger data dump.  +
-% Clarino: Tried, but restrictive licenses.  + Movie scripts. Copyright
-% unclear.
-
-% heavily biased dataset bad training data, not so much training data simple
-% model
-
-% heavily biased dataset
-% bad training data, not so much training data
-% simple model
+\paragraph{}
+From the scores we can see that there is a slight preference for the Norwegian
+chatbot, which correlates well with the resulting logs discussed earlier.
+However, the scores are relatively low, which might be due to high expecations
+from the evaluators. The evaluators were often attempting to converse within
+a large range of topics which will yield poorer results when considering the
+relatively small dataset used (10,000 samples).
 
 \section*{Conclusion}
-\todo{Write.}
-
 % Om avslutningen din skal være en konklusjon eller en oppsummering, avhenger
 % av problemstillingen din. En konklusjon skal svare på problemstillingen, mens
 % en oppsummering gjentar det viktigste fra oppgaven. Det er ikke uvanlig å
