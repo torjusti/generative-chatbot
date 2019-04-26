@@ -127,35 +127,33 @@ responds with an answer to each user query.
 % teorikapitlet, bare skal skrive om det metodiske som er relevant for din
 % studie.
 \if
- - Prøvd ut pre-existing modeller med forskjellige datasett
-    - engelsk datasett som vi vet er av god kvalitet
-    - forskjellige attention-modeller
- - Sammenlignet egne modeller og eget datasett mot dette
  - Ressursbegrensning (datakraft og tid) har begrenset omfanget på evaluering
  av forskjellige modeller
 \fi
 
 The main goal of this project was to explore the possibility of generative
-chatbots using Norwegian. In order to do this, we implement a  baseline generative
+chatbots using Norwegian. In order to do this, we implement a simple generative
 chatbot model. We then train this model using both Norwegian and English data
-in order to compare the effectiveness of the model for Norwegian in comparison
-with English. The method of choice in this projet was a simple
-sequence-to-sequence model, as proposed by Cho et al. in their paper
-\cite{Cho2014}. In order to compare the Norwegian and English models, we
-provide our observations of the models performance as well as user
-evaluations of the systems, where we have gotten a set of people to compare
-the models with each other.
+in order to compare the effectiveness of the model for Norwegian with that of
+English. The method of choice in this project was a simple sequence-to-sequence
+model, as proposed by Cho et al. in their paper \cite{Cho2014}. In order to
+compare the Norwegian and English models, we provide our own observations of
+the model performance as well as user evaluations of the systems, where we
+have gotten a set of people to compare the models with each other.
 \todo{Snik inn attention.}
 
 \paragraph{}
 One of the prerequisites for a language generation system such as a chatbot is
-data in the language being generated. The langauge generation greatly depends
-on the amount and qualtity of the available data. In this project, we perform
-comparisons using similar data conditions for both English and Norwegian, in
-order to establish the effectiveness of the \emph{model} for Norwegian. A
-discussion of the data used in this project follows in the next section.
-\todo{Implemented baseline model using full Cornell corpus.
-Then checked effectiveness in Norwegian by training two small models.}
+data in the language being generated. The langauge generation process greatly
+depends on the amount and qualtity of the available data. In this project, we
+perform comparisons using similar data conditions for both English and Norwegian,
+in order to establish the effectiveness of the \emph{model} for Norwegian. We
+trained an English chatbot using a proven chatbot corpus in order to establish
+a baseline for our comparisons. We then trained a model using our own
+Norwegian corpus. Lastly, we trained another English chatbot using a reduced
+dataset in order to compare the effectiveness of the model between English and
+Norwegian with similarly sized datasets. A discussion of the data used in this
+project follows in the next section.
 
 \paragraph{}
 Sequence-to-sequence models have proven to be an excellent baseline for
@@ -167,7 +165,7 @@ sufficiently large corpus for such example-based ``translation'' have been
 shown to produce promising results \cite{Ezquerra2018}. Although these bot are
 not able to apply any real logic to their answers, they are certainly able to
 mimic natural human language.
-\todo{Attention her og, kanskje.}
+\todo{Attention her og, kanskje. Kanskje flytt avsnittet opp et hakk.}
 
 \paragraph{}
 The model in this project utilises Google's Machine Learning framework
